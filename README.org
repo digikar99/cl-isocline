@@ -11,4 +11,4 @@ This means it works as an awesome portable repl for Common Lisp, across operatin
 
 The current repository contains source code for version 1.0.9 of Isocline, along with [[file:isocline.lisp][lisp bindings]] and a [[file:isocline-repl.lisp][simple repl]].
 
-
+[[file:demo.gif]]
