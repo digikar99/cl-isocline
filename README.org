@@ -1,0 +1,14 @@
+#+title: Common Lisp interface to Isocline with a REPL
+
+[[https://github.com/daanx/isocline][Isocline]] is an alternative to libreadline, libedit and the likes, that is
+
+- MIT licensed
+- Pure C
+- Portable across Unix, Windows, MacOS
+- Features multiline editing modes
+
+This means it works as an awesome portable repl for Common Lisp, across operating systems and lisp implementations.
+
+The current repository contains source code for version 1.0.9 of Isocline, along with [[file:isocline.lisp][lisp bindings]] and a [[file:isocline-repl.lisp][simple repl]].
+
+
