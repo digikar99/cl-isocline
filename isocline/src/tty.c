@@ -603,26 +603,7 @@ static void sig_handler(int signum, siginfo_t* siginfo, void* uap ) {
 }
 
 static void signals_install(tty_t* tty) {
-  sig_tty = tty;
-  // generic signal handler
-  struct sigaction handler;
-  memset(&handler,0,sizeof(handler));
-  sigemptyset(&handler.sa_mask);
-  handler.sa_sigaction = &sig_handler; 
-  handler.sa_flags = SA_RESTART;
-  // install for all signals
-  for( signal_handler_t* sh = sighandlers; sh->signum != 0; sh++ ) {
-    if (sigaction( sh->signum, NULL, &sh->action.previous) == 0) {            // get previous
-      if (sh->action.previous.sa_handler != SIG_IGN) {                        // if not to be ignored
-        if (sigaction( sh->signum, &handler, &sh->action.previous ) < 0) {    // install our handler
-          sh->action.previous.sa_sigaction = NULL;       // do not restore on error
-        }
-        else if (sh->signum == SIGWINCH) {
-          sig_tty->has_term_resize_event = true;
-        };
-      }
-    }    
-  }
+  return;
 }
 
 static void signals_restore(void) {
