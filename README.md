@@ -32,9 +32,43 @@ Once installed, the package manager quicklisp can be installed using:
 (ql-https:ensure-quicklisp)
 ```
 
-This assumes the availability of `curl openssl tar git`. Recommended way to obtain these is using [MSYS2](https://www.msys2.org/).
+This assumes the availability of `curl openssl tar git`. Recommended way to obtain these is using [MSYS2](https://www.msys2.org/). Once MSYS2 is installed, open the MINGW terminal and:
+
+```sh
+pacman -S git openssl
+```
 
 ## Compiling from source
+
+### Lisp compiler (or interpreter)
+
+We default to [sbcl](http://sbcl.org).
+
+#### Linux
+
+```sh
+sudo apt install sbcl
+```
+
+#### MacOS
+
+Skip [homebrew](https://brew.sh) unless installed:
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Install sbcl
+
+```sh
+brew install sbcl
+```
+
+#### Windows
+
+1. Install [MSYS2](https://www.msys2.org/).
+2. Launch the "MSYS2 MINGW" terminal.
+3. `pacman -S mingw-w64-x86_64-sbcl`
 
 ### Quicklisp client
 
