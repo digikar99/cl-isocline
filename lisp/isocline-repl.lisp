@@ -5,13 +5,11 @@
                 #:frame-vars
                 #:var-value)
   (:local-nicknames (:ic :isocline))
-  (:export #:run))
+  (:export #:main))
 
 (in-package :isocline-repl)
 
-(defvar *history-file*
-  (namestring
-   (merge-pathnames ".cl-isocline-repl" (first (directory (uiop:getenv "HOME"))))))
+(defvar *history-file*)
 
 (defvar *debug-level* 0)
 
@@ -70,7 +68,7 @@
         (terpri *error-output*)
         (force-output *error-output*)
         (ic:term-reset)
-        (run)))))
+        (repl)))))
 
 (defun may-be-invoke-restart (restart)
   (when (keywordp restart)
@@ -97,7 +95,7 @@
 
 
 
-(defun run ()
+(defun repl ()
 
   (let ((*print-case* :downcase))
 
@@ -117,3 +115,11 @@
                    (cffi:foreign-free c-input))
 
       (ic:term-done))))
+
+
+
+(defun main ()
+  (setf *history-file*
+        (uiop:native-namestring
+         (merge-pathnames ".cl-isocline-repl" (first (directory (uiop:getenv "HOME"))))))
+  (repl))
