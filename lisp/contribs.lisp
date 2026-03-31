@@ -5,7 +5,7 @@
 (defun contrib-names ()
   (let* ((contrib-dirs
            (uiop:directory-files
-            (merge-pathnames *sbcl-home* #p"contrib/")))
+            (merge-pathnames #p"contrib/" *sbcl-home*)))
          (contrib-names
            (alexandria:mappend
             (lambda (dirname)
@@ -17,7 +17,7 @@
                         (when (string= type "asd")
                           (list (intern (string-upcase name)
                                         :keyword)))))))
-            (cons (merge-pathnames *sbcl-home* #p"contrib/")
+            (cons (merge-pathnames #p"contrib/" *sbcl-home*)
                   contrib-dirs))))
     contrib-names))
 
