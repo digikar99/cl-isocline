@@ -3,7 +3,8 @@
                 #:defcfun
                 #:defcvar)
   (:use)
-  (:export #:+version+
+  (:export #:libisocline
+           #:+version+
 
            #:readline
 
