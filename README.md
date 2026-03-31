@@ -92,7 +92,7 @@ If you have ultralisp installed, then you can
 
 ```lisp
 (ql:quickload "isocline-repl")
-(isocline-repl:run)
+(isocline-repl:main)
 ```
 
 This assumes you have `gcc` installed. It will be used to compile `libisocline.so` from the sources.
