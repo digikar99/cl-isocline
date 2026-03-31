@@ -9,7 +9,7 @@
   :pathname "lisp/"
   :build-operation "program-op"
   :build-pathname "../cl-isocline-repl"
-  :entry-point "isocline-repl:run"
+  :entry-point "isocline-repl:main"
   :components ((:file "isocline-repl")
                (:file "contribs" :if-feature :sbcl)
                (:file "ql-https")))
