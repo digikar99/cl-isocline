@@ -62,8 +62,9 @@
                  (< suffix (length *restarts*)))
         (invoke-restart-interactively (nth suffix *restarts*))))))
 
-(defun print-eval-processing-errors (form)
+(defun read-print-eval-processing-errors (input)
   (let* ((*debugger-hook* #'debugger)
+         (form (read-from-string input))
          (results (multiple-value-list (eval form))))
     (unless (zerop *debug-level*)
       (may-be-invoke-restart (first results)))
@@ -84,13 +85,12 @@
                :for c-input := (ic:readline (prompt-string))
                :until (cffi:null-pointer-p c-input)
                :for input := (cffi:foreign-string-to-lisp c-input)
-               :for form := (read-from-string input)
                :do (if (zerop *debug-level*)
                        (with-simple-restart
                            (top-level-repl
                             "Ignore errors and skip to the top-level of the interactive REPL")
-                         (print-eval-processing-errors form))
-                       (print-eval-processing-errors form))
+                         (read-print-eval-processing-errors input))
+                       (read-print-eval-processing-errors input))
                    (cffi:foreign-free c-input))
 
       (ic:term-done))))
