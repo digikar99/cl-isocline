@@ -5,6 +5,10 @@
 
 (in-package :isocline-repl)
 
+(defvar *history-file*
+  (namestring
+   (merge-pathnames ".cl-isocline-repl" (first (directory (uiop:getenv "HOME"))))))
+
 (defvar *debug-level* 0)
 
 (defvar *restarts*)
@@ -67,17 +71,26 @@
     (ic:println (format nil "~A;=> ~{~S~^, ~}~%" (prompt-indent) results))
     (ic:term-reset)))
 
+
+
 (defun run ()
+
   (let ((*print-case* :downcase))
-    (loop :initially (ic:term-init)
-          :for c-input := (ic:readline (prompt-string))
-          :until (cffi:null-pointer-p c-input)
-          :for input := (cffi:foreign-string-to-lisp c-input)
-          :for form := (read-from-string input)
-          :do (if (zerop *debug-level*)
-                  (with-simple-restart
-                      (top-level-repl
-                       "Ignore errors and skip to the top-level of the interactive REPL")
-                    (print-eval-processing-errors form))
-                  (print-eval-processing-errors form))
-              (cffi:foreign-free c-input))))
+
+    (unwind-protect
+
+         (loop :initially (ic:set-history *history-file* -1)
+                          (ic:term-init)
+               :for c-input := (ic:readline (prompt-string))
+               :until (cffi:null-pointer-p c-input)
+               :for input := (cffi:foreign-string-to-lisp c-input)
+               :for form := (read-from-string input)
+               :do (if (zerop *debug-level*)
+                       (with-simple-restart
+                           (top-level-repl
+                            "Ignore errors and skip to the top-level of the interactive REPL")
+                         (print-eval-processing-errors form))
+                       (print-eval-processing-errors form))
+                   (cffi:foreign-free c-input))
+
+      (ic:term-done))))
