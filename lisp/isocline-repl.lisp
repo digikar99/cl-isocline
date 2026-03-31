@@ -84,13 +84,16 @@
 
 (defun read-print-eval-processing-errors (input)
   (let* ((*debugger-hook* #'debugger)
-         (form (read-from-string input))
-         (results (multiple-value-list (eval form))))
-    (unless (zerop *debug-level*)
-      (may-be-invoke-restart (first results)))
-    (ic:term-italic t)
-    (ic:println (format nil "~A;=> ~{~S~^, ~}~%" (prompt-indent) results))
-    (ic:term-reset)))
+         (input (string-trim '(#\space #\tab #\newline #\return) input)))
+    (with-input-from-string (in input)
+      (loop :while (listen in)
+            :for form := (read in)
+            :for results := (multiple-value-list (eval form))
+            :do (unless (zerop *debug-level*)
+                  (may-be-invoke-restart (first results)))
+                (ic:term-italic t)
+                (ic:println (format nil "~A;=> ~{~S~^, ~}~%" (prompt-indent) results))
+                (ic:term-reset)))))
 
 
 
