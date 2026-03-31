@@ -1,0 +1,90 @@
+on: [push, pull_request]
+
+jobs:
+
+  build:
+
+    name: ${{ matrix.OS }}
+
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        lisp: [sbcl_static]
+        OS: [windows]
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        install: git curl zip gcc mingw-w64-x86_64-toolchain mingw-w64-x86_64-autotools mingw-w64-x86_64-cmake
+
+
+    - name: Check $PATH
+      run: echo $PATH
+
+    - name: Download implementation
+      env:
+        LISP: ${{ matrix.lisp }}
+        OS:   ${{ matrix.OS }}
+      run: |
+        pwd
+        ls -l
+        bash --version
+        bash <(curl -s https://raw.githubusercontent.com/digikar99/lisp-travis-lite/master/run.sh)
+
+    - name: Compile isocline
+      run: |
+        pwd
+        cd isocline/
+        mkdir -p build/release
+        cd build/release
+        cmake ../..
+        cmake --build .
+        
+    - name: Statically link against libreadline
+      run: |
+        SBCL_DIR="sbcl-2.6.2+r00-x86-64-windows"
+        LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
+        cd "/home/runneradmin/$SBCL_DIR"
+        export WHOLE_ARCHIVES="$LIBISOCLINE"
+        make -C "src/runtime" -f binaries.mk sbcl.extras
+        mv "src/runtime/sbcl.extras" "src/runtime/sbcl"
+
+
+    - name: Dump lisp image (windows)
+      run: |
+        cl --load isocline-repl.asd \
+           --load isocline.asd \
+           --eval '(ql:quickload :isocline-repl)' \
+           --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
+           --eval '(asdf:make "isocline-repl")' \
+           --quit
+
+    - name: Set release name
+      run: |
+        echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+
+    - name: Rename lisp image and copy licenses
+      run: |
+        mkdir ${{ env.IC_REPL_DIR }}
+        mv cl-isocline-repl.exe ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.exe
+        cp -r /home/runneradmin/sbcl-2.6.2+r00-x86-64-windows/COPYING* ${{ env.IC_REPL_DIR }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.IC_REPL_DIR }}
+        path: ${{ env.IC_REPL_DIR }}
+        compression-level: 0
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: ${{ env.IC_REPL_DIR }}
