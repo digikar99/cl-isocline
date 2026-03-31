@@ -1,5 +1,9 @@
 (defpackage :isocline-repl
   (:use :cl)
+  (:import-from :trivial-backtrace
+                #:frame-func
+                #:frame-vars
+                #:var-value)
   (:local-nicknames (:ic :isocline))
   (:export #:run))
 
@@ -26,28 +30,44 @@
 
 (defun debugger (condition hook)
   (declare (ignore hook))
-  (let ((*debug-level* (1+ *debug-level*)))
+  (let ((*debug-level* (1+ *debug-level*))
+        (*debugger-hook* #'debugger)
+        (indent (prompt-indent)))
     (when (typep condition 'error)
-      (ic:term-bold t)
       (ic:term-style "ic-error")
       ;; The error
-      (ic:println
-       (format nil "~S: ~A~%" (class-name (class-of condition)) condition))
-      (ic:term-bold nil)
+      (let ((*print-case* :upcase))
+        (ic:print
+         (format nil "  ~A~S: ~A~%~%"
+                 indent
+                 (class-name (class-of condition))
+                 condition)))
       ;; The backtrace
-      (uiop:print-backtrace :stream *error-output* :condition condition)
+      (let ((frame-depth -1))
+        (format *error-output* "  ~ABacktrace:~%" indent)
+        (trivial-backtrace:map-backtrace
+         (lambda (frame)
+           (format *error-output*
+                   "  ~A  ~D: (~S ~{~S~^ ~})~%"
+                   indent
+                   (incf frame-depth)
+                   (frame-func frame)
+                   (mapcar #'var-value (frame-vars frame))))))
+      (terpri *error-output*)
       ;; The restarts
       (ic:term-style "ic-hint")
       (let ((*restarts* (compute-restarts condition)))
-        (ic:println (with-output-to-string (s)
-                      (format s "Applicable restarts \\[:R1 :R2 etc]:~%")
-                      (loop :for i :from 0
-                            :for r :in *restarts*
-                            :do (format s "~A  \\[:R~D] \\[~A]: ~A~%"
-                                        (prompt-indent)
-                                        i
-                                        (string-upcase (restart-name r))
-                                        r))))
+        (write-string (with-output-to-string (s)
+                        (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
+                        (loop :for i :from 0
+                              :for r :in *restarts*
+                              :do (format s "  ~A  [:r~D] [~A]: ~A~%"
+                                          indent
+                                          i
+                                          (string-upcase (restart-name r))
+                                          r)))
+                      *error-output*)
+        (terpri *error-output*)
         (force-output *error-output*)
         (ic:term-reset)
         (run)))))

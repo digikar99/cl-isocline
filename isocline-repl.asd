@@ -1,5 +1,6 @@
 (asdf:defsystem "isocline-repl"
   :depends-on ("isocline"
+               "trivial-backtrace"
                "uiop")
   :license "MIT"
   :author "Shubhamkar Ayare (digikar@proton.me)"
