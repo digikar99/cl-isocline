@@ -5,10 +5,11 @@
 - MIT licensed
 - Pure C
 - Portable across Unix, Windows, MacOS
-- Features multiline editing modes
+- Supports multiline editing out of the box
+- ... and much more ...
 
 This means it works as an awesome portable repl for Common Lisp, across operating systems and lisp implementations.
 
-The current repository contains source code for version 1.0.9 of Isocline, along with [[file:isocline.lisp][lisp bindings]] and a [[file:isocline-repl.lisp][simple repl]].
+The current repository contains source code for version 1.0.9 of Isocline, along with [[file:lisp/isocline.lisp][lisp bindings]] and a [[file:lisp/isocline-repl.lisp][simple repl]].
 
 [[file:demo.gif]]
