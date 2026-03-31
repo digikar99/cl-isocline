@@ -43,10 +43,10 @@
                       (format s "Applicable restarts \\[:R1 :R2 etc]:~%")
                       (loop :for i :from 0
                             :for r :in *restarts*
-                            :do (format s "~A  \\[:R~D] ~S: ~A~%"
+                            :do (format s "~A  \\[:R~D] \\[~A]: ~A~%"
                                         (prompt-indent)
                                         i
-                                        (restart-name r)
+                                        (string-upcase (restart-name r))
                                         r))))
         (force-output *error-output*)
         (ic:term-reset)
