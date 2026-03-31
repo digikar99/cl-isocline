@@ -26,6 +26,14 @@ repl](lisp/isocline-repl.lisp).
 Currently standalone binaries are available for Windows. See the
 [Releases](https://github.com/digikar99/cl-isocline/releases/).
 
+Once installed, the package manager quicklisp can be installed using:
+
+```lisp
+(ql-https:ensure-quicklisp)
+```
+
+This assumes the availability of `curl openssl tar git`. Recommended way to obtain these is using [MSYS2](https://www.msys2.org/).
+
 ## Compiling from source
 
 ### Quicklisp client
@@ -52,6 +60,8 @@ If you have ultralisp installed, then you can
 (ql:quickload "isocline-repl")
 (isocline-repl:run)
 ```
+
+This assumes you have `gcc` installed. It will be used to compile `libisocline.so` from the sources.
 
 ### Binary
 

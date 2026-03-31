@@ -1,5 +1,6 @@
 (asdf:defsystem "isocline-repl"
   :depends-on ("isocline"
+               "ql-https"
                "trivial-backtrace"
                "uiop")
   :license "MIT"
@@ -10,7 +11,8 @@
   :build-pathname "../cl-isocline-repl"
   :entry-point "isocline-repl:run"
   :components ((:file "isocline-repl")
-               (:file "contribs" :if-feature :sbcl)))
+               (:file "contribs" :if-feature :sbcl)
+               (:file "ql-https")))
 
 
 #+sb-core-compression
