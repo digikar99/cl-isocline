@@ -19,6 +19,19 @@ repl](lisp/isocline-repl.lisp).
 
 ![](demo.gif)
 
+# Contents
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Installation](#installation)
+    - [Binaries](#binaries)
+    - [Compiling from source](#compiling-from-source)
+- [TODO](#todo)
+
+<!-- markdown-toc end -->
+
+
 # Installation
 
 ## Binaries
