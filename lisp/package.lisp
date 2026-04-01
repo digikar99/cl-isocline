@@ -1,7 +1,8 @@
 (cl:defpackage :isocline
   (:import-from #:cffi
                 #:defcfun
-                #:defcvar)
+                #:defcvar
+                #:defcstruct)
   (:use)
   (:export #:libisocline
            #:+version+
@@ -20,6 +21,23 @@
            #:history-remove-last
            #:history-clear
            #:history-add
+
+           #:completion-env
+           #:env
+           #:input
+           #:cursor
+           #:arg
+           #:closure
+           #:complete
+
+           #:set-default-completer
+           #:add-completion
+           #:add-completion-ex
+           #:add-completions
+           #:complete-filename
+           #:complete-word
+           #:complete-qword
+           #:complete-qword-ex
 
            #:term-init
            #:term-done

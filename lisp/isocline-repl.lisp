@@ -116,10 +116,87 @@
 
       (ic:term-done))))
 
+(defun terminating-char-p (char)
+  (declare (optimize speed))
+  (multiple-value-bind (fn non-terminating-p)
+      (get-macro-character char)
+    (and fn (not non-terminating-p))))
 
+(cffi:defcallback word-completer :void
+    ((cenv (:pointer (:struct ic::completion-env)))
+     (prefix :string))
+  (declare (optimize (speed 1) safety (debug 3)))
+
+  (handler-case
+      (progn
+        (let* ((input (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:input))
+               (cursor-position (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:cursor))
+               (colon-position (position-if (lambda (c) (char= #\: c)) input :from-end t :end cursor-position))
+               (internal-symbols-p (or (not colon-position)
+                                       (and colon-position
+                                            (< 0 colon-position)
+                                            (char= #\: (char input (1- colon-position))))))
+               (pkg-name-end (if (and colon-position
+                                      internal-symbols-p)
+                                 (1- colon-position)
+                                 colon-position))
+
+               (pkg-name-start (when colon-position
+                                 (position-if #'terminating-char-p
+                                                input
+                                                :from-end t
+                                                :end pkg-name-end)))
+               (pkg-prefix (when pkg-name-start
+                             (subseq input (1+ pkg-name-start) pkg-name-end)))
+
+               (*package* (cond (pkg-prefix
+                                 (or (find-package (nstring-upcase pkg-prefix))
+                                     *package*))
+                                (colon-position
+                                 (find-package :keyword))
+                                (t
+                                 *package*)))
+
+               (pkg-completions
+                 (loop :for pkg :in (list-all-packages)
+                       :for pkg-name := (string-downcase (package-name pkg))
+                       :if (uiop:string-prefix-p prefix pkg-name)
+                         :collect pkg-name))
+               (symbol-completions
+                 (let ((symbol-names nil))
+                   (if (and pkg-prefix
+                            (not internal-symbols-p))
+                       (do-external-symbols (s *package*)
+                         (let ((name (string-downcase (symbol-name s))))
+                           (when (uiop:string-prefix-p prefix name)
+                             (push name symbol-names))))
+                       (do-symbols (s *package*)
+                         (let ((name (string-downcase (symbol-name s))))
+                           (when (uiop:string-prefix-p prefix name)
+                             (push name symbol-names)))))
+                   symbol-names)))
+
+            (loop :for c :in (if pkg-prefix
+                                 (sort symbol-completions #'string<)
+                                 (nconc (sort symbol-completions #'string<)
+                                        (sort pkg-completions #'string<)))
+                  :do (ic:add-completion cenv c))))
+
+    (error (c)
+      (format *error-output* "Error encountered while completing:~%~%  ~A~%~%" c)
+      (uiop:print-backtrace :condition t :stream *error-output*)
+      (terpri *error-output*)
+      (force-output *error-output*))))
+
+(cffi:defcallback completer :void
+    ((cenv (:pointer (:struct ic::completion-env)))
+     (prefix :string))
+  (declare (optimize (speed 1) safety debug))
+  (ic:complete-word cenv prefix (cffi:callback word-completer) (cffi:null-pointer)))
 
 (defun main ()
   (setf *history-file*
         (uiop:native-namestring
          (merge-pathnames ".cl-isocline-repl" (first (directory (uiop:getenv "HOME"))))))
+  (ic:set-default-completer (cffi:callback completer) (cffi:null-pointer))
   (repl))

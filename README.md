@@ -128,7 +128,7 @@ Contributions welcome!
 - [x] Debugger Support
 - [ ] Compile standalone binaries for MacOS
 - [ ] Compile standalone binaries for Linux
-- [ ] Add completion support
+- [x] Add completion support
 - [ ] Better copy-paste support
 - [ ] Easy: Ship with [CIEL](https://ciel-lang.org/)
 - [ ] Easy: Process command line arguments (load, eval) with unix-opts

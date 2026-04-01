@@ -68,6 +68,103 @@
 
 ;; TODO: Completion
 
+(defcstruct completion-env
+  (env :pointer) ; ic_env_t: the isocline environment
+  (input :string) ; current full input
+  (cursor :long) ; current cursor position
+  (arg :pointer) ; argument given to ic_set_completer
+  (closure :pointer) ; free variables for function composition
+  (complete :pointer) ; ic_completion_fun_t*: function that adds a completion
+  )
+
+(defcfun (set-default-completer "ic_set_default_completer") :void
+  "Set the default completion handler.
+  @param completer  The completion function
+  @param arg        Argument passed to the \a completer.
+There can only be one default completion function, setting it again disables the previous one.
+The initial completer use `ic_complete_filename`."
+  (completer :pointer) ; ic_completion_fun_t*
+  (arg :pointer))
+
+(defcfun (add-completion "ic_add_completion") :bool
+  "In a completion callback (usually from ic_complete_word()), use this function to add a completion.
+(the completion string is copied by isocline and do not need to be preserved or allocated).
+
+Returns `true` if the callback should continue trying to find more possible completions.
+If `false` is returned, the callback should try to return and not add more completions (for improved latency)."
+  (cenv (:pointer (:struct completion-env)))
+  (completion :string))
+
+(defcfun (add-completion-ex "ic_add_completion_ex") :bool
+  "In a completion callback (usually from ic_complete_word()), use this function to add a completion.
+The `display` is used to display the completion in the completion menu, and `help` is
+displayed for hints for example. Both can be `NULL` for the default.
+(all are copied by isocline and do not need to be preserved or allocated).
+
+Returns `true` if the callback should continue trying to find more possible completions.
+If `false` is returned, the callback should try to return and not add more completions (for improved latency)."
+  (cenv (:pointer (:struct completion-env)))
+  (completion :string)
+  (display :string)
+  (help :string))
+
+(defcfun (add-completions "ic_add_completions") :bool
+  "In a completion callback (usually from ic_complete_word()), use this function to add completions.
+The `completions` array should be terminated with a NULL element, and all elements
+are added as completions if they start with `prefix`.
+
+Returns `true` if the callback should continue trying to find more possible completions.
+If `false` is returned, the callback should try to return and not add more completions (for improved latency)."
+  (cenv (:pointer (:struct completion-env)))
+  (prefix :string)
+  ;; const char** completions
+  (completions (:pointer :string)))
+
+(defcfun (complete-filename "ic_complete_filename") :void
+  "Complete a filename.
+Complete a filename given a semi-colon separated list of root directories `roots` and
+semi-colon separated list of possible extensions (excluding directories).
+If `roots` is NULL, the current directory is the root (\".\").
+If `extensions` is NULL, any extension will match.
+Each root directory should _not_ end with a directory separator.
+If a directory is completed, the `dir_separator` is added at the end if it is not `0`.
+Usually the `dir_separator` is `/` but it can be set to `\\` on Windows systems.
+For example:
+```
+/ho         --> /home/
+/home/.ba   --> /home/.bashrc
+```
+(This already uses ic_complete_quoted_word() so do not call it from inside a word handler).
+"
+  (cenv (:pointer (:struct completion-env)))
+  (prefix :string)
+  (dir-separator :char)
+  (roots :string)
+  (extensions :string))
+
+(defcfun (complete-word "ic_complete_word") :void
+  "Complete a _word_ (i.e. _token_).
+Calls the user provided function `fun` to complete on the
+current _word_. Almost all user provided completers should use this function.
+If `is_word_char` is NULL, the default `&ic_char_is_nonseparator` is used.
+The `prefix` passed to `fun` is modified to only contain the current word, and
+any results from `ic_add_completion` are automatically adjusted to replace that part.
+For example, on the input \"hello w\", a the user `fun` only gets `w` and can just complete
+with \"world\" resulting in \"hello world\" without needing to consider `delete_before` etc.
+@see ic_complete_qword() for completing quoted and escaped tokens."
+  (cenv (:pointer (:struct completion-env)))
+  (prefix :string)
+  ;; ic_completer_fun_t* fun
+  (fun :pointer)
+  ;; ic_is_char_class_fun_t* is_word_char
+  (is-word-char :pointer))
+
+;; TODO
+;; (defcfun (complete-qword))
+
+;; TODO
+;; (defcfun (complete-qword-ex))
+
 ;; TODO: Syntax
 
 ;; TODO: Options
