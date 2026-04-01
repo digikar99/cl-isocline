@@ -91,6 +91,12 @@
                   (may-be-invoke-restart (first results)))
                 (ic:term-italic t)
                 (ic:println (format nil "~A;=> ~{~S~^, ~}~%" (prompt-indent) results))
+                (setf cl:*** cl:**
+                      cl:** cl:*
+                      cl:* (first results)
+                      cl:+++ cl:++
+                      cl:++ cl:+
+                      cl:+ form)
                 (ic:term-reset)))))
 
 
