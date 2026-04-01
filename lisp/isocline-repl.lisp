@@ -118,9 +118,10 @@
 
 (defun terminating-char-p (char)
   (declare (optimize speed))
-  (multiple-value-bind (fn non-terminating-p)
-      (get-macro-character char)
-    (and fn (not non-terminating-p))))
+  (or (member char '(#\space #\tab #\newline #\return) :test #'char=)
+      (multiple-value-bind (fn non-terminating-p)
+          (get-macro-character char)
+        (and fn (not non-terminating-p)))))
 
 (cffi:defcallback word-completer :void
     ((cenv (:pointer (:struct ic::completion-env)))
