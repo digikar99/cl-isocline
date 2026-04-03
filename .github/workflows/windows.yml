@@ -22,7 +22,7 @@ jobs:
 
     - uses: msys2/setup-msys2@v2
       with:
-        install: git curl zip gcc mingw-w64-x86_64-toolchain mingw-w64-x86_64-autotools mingw-w64-x86_64-cmake
+        install: git curl zip gcc atool mingw-w64-x86_64-toolchain mingw-w64-x86_64-autotools mingw-w64-x86_64-cmake mingw-w64-x86_64-github-cli
 
 
     - name: Check $PATH
@@ -75,6 +75,7 @@ jobs:
         mkdir ${{ env.IC_REPL_DIR }}
         mv cl-isocline-repl.exe ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.exe
         cp -r /home/runneradmin/sbcl-2.6.3+r00-x86-64-windows/COPYING* ${{ env.IC_REPL_DIR }}
+        apack ${{ env.IC_REPL_DIR }}.zip ${{ env.IC_REPL_DIR }}/*
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -83,8 +84,8 @@ jobs:
         path: ${{ env.IC_REPL_DIR }}
         compression-level: 0
 
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        files: ${{ env.IC_REPL_DIR }}
+    - name: Upload asset to 'latest' release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload latest *.zip --clobber

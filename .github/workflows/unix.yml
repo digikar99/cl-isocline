@@ -65,6 +65,8 @@ jobs:
         mkdir ${{ env.IC_REPL_DIR }}
         mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.bin
         cp -r /home/runner/sbcl-2.6.3+r00-x86-64-linux/COPYING* ${{ env.IC_REPL_DIR }}
+        sudo apt install -y atool
+        apack ${{ env.IC_REPL_DIR }}.tar.gz ${{ env.IC_REPL_DIR }}/*
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -73,8 +75,9 @@ jobs:
         path: ${{ env.IC_REPL_DIR }}
         compression-level: 0
 
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        files: ${{ env.IC_REPL_DIR }}
+    - name: Upload asset to 'latest' release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete latest --yes --cleanup-tag
+        gh release create latest *.tar.gz
