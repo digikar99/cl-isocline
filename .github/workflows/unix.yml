@@ -3,30 +3,21 @@ on: [push, pull_request]
 jobs:
 
   build:
-
     name: ${{ matrix.OS }}
-
-    runs-on: windows-latest
 
     strategy:
       matrix:
+        OS: [ubuntu-24.04]
         lisp: [sbcl_static]
-        OS: [windows]
+      fail-fast: false
+    runs-on: ${{ matrix.OS }}
 
-    defaults:
-      run:
-        shell: msys2 {0}
+    # NOTE: PWD = GITHUB_WORKSPACE = /home/runner/work/cl-repl/cl-repl = ~/work/cl-repl/cl-repl
+    #       HOME = /home/runner
 
     steps:
+
     - uses: actions/checkout@v4
-
-    - uses: msys2/setup-msys2@v2
-      with:
-        install: git curl zip gcc mingw-w64-x86_64-toolchain mingw-w64-x86_64-autotools mingw-w64-x86_64-cmake
-
-
-    - name: Check $PATH
-      run: echo $PATH
 
     - name: Download implementation
       env:
@@ -49,13 +40,12 @@ jobs:
         
     - name: Statically link against libisocline
       run: |
-        SBCL_DIR="sbcl-2.6.3+r00-x86-64-windows"
+        SBCL_DIR="sbcl-2.6.3+r00-x86-64-linux"
         LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
-        cd "/home/runneradmin/$SBCL_DIR"
+        cd "/home/runner/$SBCL_DIR"
         export WHOLE_ARCHIVES="$LIBISOCLINE"
         make -C "src/runtime" -f binaries.mk sbcl.extras
         mv "src/runtime/sbcl.extras" "src/runtime/sbcl"
-
 
     - name: Dump lisp image
       run: |
@@ -66,15 +56,15 @@ jobs:
            --eval '(asdf:make "isocline-repl")' \
            --quit
 
+        
     - name: Set release name
-      run: |
-        echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+      run: echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
 
     - name: Rename lisp image and copy licenses
       run: |
         mkdir ${{ env.IC_REPL_DIR }}
-        mv cl-isocline-repl.exe ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.exe
-        cp -r /home/runneradmin/sbcl-2.6.3+r00-x86-64-windows/COPYING* ${{ env.IC_REPL_DIR }}
+        mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.bin
+        cp -r /home/runner/sbcl-2.6.3+r00-x86-64-linux/COPYING* ${{ env.IC_REPL_DIR }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
