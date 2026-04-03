@@ -37,13 +37,18 @@ jobs:
         cd build/release
         cmake ../..
         cmake --build .
-        
-    - name: Statically link against libisocline
+
+    - name: Statically link against libisocline + libcrypto, libssl, libtls
       run: |
+        sudo apt install -y libssl-dev libtls-dev
         SBCL_DIR="sbcl-2.6.3+r00-x86-64-linux"
+        SYS_LIBDIR="/usr/lib/x86_64-linux-gnu"
+        LIBCRYPTO=${SYS_LIBDIR}/libcrypto.a
+        LIBSSL=${SYS_LIBDIR}/libssl.a
+        LIBTLS=${SYS_LIBDIR}/libtls.a
         LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
+        export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBTLS $LIBISOCLINE"
         cd "/home/runner/$SBCL_DIR"
-        export WHOLE_ARCHIVES="$LIBISOCLINE"
         make -C "src/runtime" -f binaries.mk sbcl.extras
         mv "src/runtime/sbcl.extras" "src/runtime/sbcl"
 
