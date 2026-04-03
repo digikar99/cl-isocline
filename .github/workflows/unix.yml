@@ -56,16 +56,31 @@ jobs:
       run: |
         cl --load isocline-repl.asd \
            --load isocline.asd \
-           --eval '(ql:quickload :isocline-repl)' \
+           --eval '(ql:quickload "isocline-repl")' \
            --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
            --eval '(asdf:make "isocline-repl")' \
            --quit
 
-        
-    - name: Set release name
-      run: echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+    - name: Dump lisp image with CIEL
+      continue-on-error: true
+      run: |
+        sudo apt install -y libssl-dev libssl3t64 openssl
+        cl --load isocline-repl+ciel.asd \
+           --load isocline-repl.asd \
+           --load isocline.asd \
+           --eval '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)' \
+           --eval '(ql:quickload "isocline-repl+ciel")' \
+           --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
+           --eval "(cl:in-package :ciel-user)" \
+           --eval '(asdf:make "isocline-repl+ciel")' \
+           --quit
 
-    - name: Rename lisp image and copy licenses
+    - name: Set release name
+      run: |
+        echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+        echo "IC_REPL_CIEL_DIR=cl-isocline-repl+ciel.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+
+    - name: Rename base lisp image and copy licenses
       run: |
         mkdir ${{ env.IC_REPL_DIR }}
         mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.bin
@@ -73,12 +88,14 @@ jobs:
         sudo apt install -y atool
         apack ${{ env.IC_REPL_DIR }}.tar.gz ${{ env.IC_REPL_DIR }}/*
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.IC_REPL_DIR }}
-        path: ${{ env.IC_REPL_DIR }}
-        compression-level: 0
+    - name: Rename lisp image with CIEL and copy licenses
+      continue-on-error: true
+      run: |
+        mkdir ${{ env.IC_REPL_CIEL_DIR }}
+        mv cl-isocline-repl+ciel ${{ env.IC_REPL_CIEL_DIR }}/${{ env.IC_REPL_CIEL_DIR }}.bin
+        cp -r /home/runner/sbcl-2.6.3+r00-x86-64-linux/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
+        sudo apt install -y atool
+        apack ${{ env.IC_REPL_CIEL_DIR }}.tar.gz ${{ env.IC_REPL_CIEL_DIR }}/*
 
     - name: Upload asset to 'latest' release
       env:

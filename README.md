@@ -127,9 +127,9 @@ Contributions welcome!
 - [x] [ql-https](https://github.com/rudolfochrist/ql-https) bootstrapping
 - [x] Debugger Support
 - [ ] Compile standalone binaries for MacOS
-- [ ] Compile standalone binaries for Linux
+- [x] Compile standalone binaries for Linux
 - [x] Add completion support
 - [ ] Better copy-paste support
-- [ ] Easy: Ship with [CIEL](https://ciel-lang.org/)
+- [x] Ship with [CIEL](https://ciel-lang.org/)
 - [ ] Easy: Process command line arguments (load, eval) with unix-opts
 - [ ] Easy: Add a dumb mode so that it can work directly with SLIME or the likes

@@ -69,23 +69,38 @@ jobs:
            --eval '(asdf:make "isocline-repl")' \
            --quit
 
+    - name: Dump lisp image with CIEL
+      continue-on-error: true
+      run: |
+        cl --load isocline-repl+ciel.asd \
+           --load isocline-repl.asd \
+           --load isocline.asd \
+           --eval '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)' \
+           --eval '(ql:quickload "isocline-repl+ciel")' \
+           --eval "(cffi:close-foreign-library 'isocline::libisocline)" \
+           --eval "(cl:in-package :ciel-user)" \
+           --eval '(asdf:make "isocline-repl+ciel")' \
+           --quit
+
     - name: Set release name
       run: |
         echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+        echo "IC_REPL_CIEL_DIR=cl-isocline-repl+ciel.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
 
-    - name: Rename lisp image and copy licenses
+    - name: Rename base lisp image and copy licenses
       run: |
         mkdir ${{ env.IC_REPL_DIR }}
-        mv cl-isocline-repl.exe ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.exe
+        mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.exe
         cp -r /home/runneradmin/sbcl-2.6.3+r00-x86-64-windows/COPYING* ${{ env.IC_REPL_DIR }}
         apack ${{ env.IC_REPL_DIR }}.zip ${{ env.IC_REPL_DIR }}/*
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.IC_REPL_DIR }}
-        path: ${{ env.IC_REPL_DIR }}
-        compression-level: 0
+    - name: Rename lisp image with CIEL and copy licenses
+      continue-on-error: true
+      run: |
+        mkdir ${{ env.IC_REPL_CIEL_DIR }}
+        mv cl-isocline-repl+ciel ${{ env.IC_REPL_CIEL_DIR }}/${{ env.IC_REPL_CIEL_DIR }}.exe
+        cp -r /home/runneradmin/sbcl-2.6.3+r00-x86-64-windows/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
+        apack ${{ env.IC_REPL_CIEL_DIR }}.zip ${{ env.IC_REPL_CIEL_DIR }}/*
 
     - name: Upload asset to 'latest' release
       env:
