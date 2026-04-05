@@ -5,7 +5,10 @@
                 #:frame-vars
                 #:var-value)
   (:local-nicknames (:ic :isocline))
-  (:export #:main))
+  (:export #:*history-file*
+           #:*read-function*
+           #:main
+           #:repl))
 
 (in-package :isocline-repl)
 
@@ -80,12 +83,15 @@
                  (< suffix (length *restarts*)))
         (invoke-restart-interactively (nth suffix *restarts*))))))
 
+(defvar *read-function* 'cl:read
+  "The reader function used by Isocline REPL.")
+
 (defun read-print-eval-processing-errors (input)
   (let* ((*debugger-hook* #'debugger)
          (input (string-trim '(#\space #\tab #\newline #\return) input)))
     (with-input-from-string (in input)
       (loop :while (listen in)
-            :for form := (read in)
+            :for form := (funcall *read-function* in)
             :for results := (multiple-value-list (eval form))
             :do (unless (zerop *debug-level*)
                   (may-be-invoke-restart (first results)))
