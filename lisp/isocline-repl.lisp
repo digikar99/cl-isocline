@@ -214,6 +214,6 @@
 (defun main ()
   (setf *history-file*
         (uiop:native-namestring
-         (merge-pathnames ".cl-isocline-repl" (first (directory (uiop:getenv "HOME"))))))
+         (merge-pathnames ".cl-isocline-repl" (user-homedir-pathname))))
   (ic:set-default-completer (cffi:callback completer) (cffi:null-pointer))
   (repl))
