@@ -46,14 +46,18 @@
       ;; The backtrace
       (let ((frame-depth -1))
         (format *error-output* "  ~ABacktrace:~%" indent)
-        (trivial-backtrace:map-backtrace
-         (lambda (frame)
-           (format *error-output*
-                   "  ~A  ~D: (~S ~{~S~^ ~})~%"
-                   indent
-                   (incf frame-depth)
-                   (frame-func frame)
-                   (mapcar #'var-value (frame-vars frame))))))
+        (block print-backtrace
+          (trivial-backtrace:map-backtrace
+           (lambda (frame)
+             (when (and *print-length*
+                        (< *print-length* frame-depth))
+               (return-from print-backtrace nil))
+             (format *error-output*
+                     "  ~A  ~D: (~S ~{~S~^ ~})~%"
+                     indent
+                     (incf frame-depth)
+                     (frame-func frame)
+                     (mapcar #'var-value (frame-vars frame)))))))
       (terpri *error-output*)
       ;; The restarts
       (ic:term-style "ic-hint")
