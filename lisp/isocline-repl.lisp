@@ -4,7 +4,10 @@
                 #:frame-func
                 #:frame-vars
                 #:var-value)
-  (:local-nicknames (:ic :isocline))
+  (:local-nicknames (:ic :isocline)
+                    (:ec :eclector.reader)
+                    (:ecst :eclector.concrete-syntax-tree)
+                    (:cst :concrete-syntax-tree))
   (:export #:*history-file*
            #:*read-function*
            #:main
@@ -206,14 +209,54 @@
       (force-output *error-output*))))
 
 (cffi:defcallback completer :void
-    ((cenv (:pointer (:struct ic::completion-env)))
+    ((cenv (:pointer (:struct ic:completion-env)))
      (prefix :string))
   (declare (optimize (speed 1) safety debug))
   (ic:complete-word cenv prefix (cffi:callback word-completer) (cffi:null-pointer)))
+
+(cffi:defcallback highlighter :void
+    ((henv (:pointer (:struct ic:highlight-env)))
+     (input :string)
+     (arg :pointer))
+  (declare (optimize (speed 1) safety debug)
+           (ignore arg))
+  (multiple-value-bind (input-cst error)
+      (ignore-errors (handler-bind ((ec:package-does-not-exist
+                                      (lambda (c)
+                                        (declare (ignore c))
+                                        (invoke-restart 'ec:recover))))
+                       ;; We use ECST because we want to preserve source information
+                       (nth-value 0 (ecst:read-from-string input))))
+    (labels ((highlight (elt carp)
+               (let* ((raw (cst:raw elt))
+                      (pos (cst:source elt))
+                      (start (car pos))
+                      (length (when start (- (cdr pos) (car pos))))
+                      (hl-class (cond ((vectorp raw) "string")
+                                      ((numberp raw) "number")
+                                      ((symbolp raw)
+                                       (if carp
+                                           (when (eq (find-package :cl)
+                                                     (symbol-package raw))
+                                             "keyword")
+                                           (when (find-class raw nil)
+                                             "type"))))))
+                 (when (and start hl-class)
+                   (ic:highlight henv start length hl-class))))
+             (traverse (tree)
+               (if (cst:atom tree)
+                   (highlight tree nil)
+                   (progn
+                     (highlight (cst:first tree) t)
+                     (dotimes (i (1- (length (cst:raw tree))))
+                       (traverse (cst:nth (1+ i) tree)))))))
+      (unless error
+        (traverse input-cst)))))
 
 (defun main ()
   (setf *history-file*
         (uiop:native-namestring
          (merge-pathnames ".cl-isocline-repl" (user-homedir-pathname))))
   (ic:set-default-completer (cffi:callback completer) (cffi:null-pointer))
+  (ic:set-default-highlighter (cffi:callback highlighter) (cffi:null-pointer))
   (repl))

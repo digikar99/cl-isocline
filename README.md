@@ -129,6 +129,7 @@ Contributions welcome!
 - [ ] Compile standalone binaries for MacOS
 - [x] Compile standalone binaries for Linux
 - [x] Add completion support
+- [x] Syntax highlighting
 - [ ] Better copy-paste support
 - [x] Ship with [CIEL](https://ciel-lang.org/)
 - [ ] Easy: Process command line arguments (load, eval) with unix-opts

@@ -39,6 +39,24 @@
            #:complete-qword
            #:complete-qword-ex
 
+           #:alloc
+           #:malloc
+           #:realloc
+           #:free
+
+           #:highlight-env
+           #:attrs
+           #:input
+           #:input-len
+           #:bbcode
+           #:mem
+           #:cached-upos
+           #:cached-cpos
+
+           #:set-default-highlighter
+           #:highlight
+           #:highlight-formatted
+
            #:term-init
            #:term-done
            #:term-flush

@@ -165,7 +165,48 @@ with \"world\" resulting in \"hello world\" without needing to consider `delete_
 ;; TODO
 ;; (defcfun (complete-qword-ex))
 
-;; TODO: Syntax
+(defcstruct alloc
+  (malloc :pointer)
+  (realloc :pointer)
+  (free :pointer))
+
+(defcstruct highlight-env
+  (attrs :pointer)
+  (input :string)
+  (input-len :size)
+  ;; TODO: bbcode struct
+  (bbcode :pointer)
+  (mem (:pointer (:struct alloc)))
+  (cached-upos :size)
+  (cached-cpos :size))
+
+;; TODO: ic_highlight_fun_t
+
+(defcfun (set-default-highlighter "ic_set_default_highlighter") :void
+  "Set a syntax highlighter.
+There can only be one highlight function, setting it again disables the previous one."
+  (highlighter :pointer)
+  (arg :pointer))
+
+(defcfun (highlight "ic_highlight") :void
+  "Set the style of characters starting at position `pos`."
+  (henv (:pointer (:struct highlight-env)))
+  (pos :long)
+  (count :long)
+  (style :string))
+
+(defcfun (highlight-formatted "ic_highlight_formatted") :void
+  "Experimental: Convenience function for highlighting with bbcodes.
+Can be called in a `ic_highlight_fun_t` callback to colorize the `input` using the
+the provided `formatted` input that is the styled `input` with bbcodes. The
+content of `formatted` without bbcode tags should match `input` exactly.
+"
+  (henv (:pointer (:struct highlight-env)))
+  (input :string)
+  (formatted :string))
+
+;; TODO: ic_highlight_format_fun_t
+
 
 ;; TODO: Options
 
