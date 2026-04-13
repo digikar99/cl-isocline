@@ -207,12 +207,108 @@ content of `formatted` without bbcode tags should match `input` exactly.
 
 ;; TODO: ic_highlight_format_fun_t
 
+;; Options
 
-;; TODO: Options
+(defcfun (set-prompt-marker "ic_set_prompt_marker") :void
+  "Set a prompt marker and a potential marker for extra lines with multiline input.
+Pass \a NULL for the `prompt_marker` for the default marker (`\"> \"`).
+Pass \a NULL for continuation prompt marker to make it equal to the `prompt_marker`."
+  (prompt-marker :string)
+  (continuation-prompt-marker :string))
+
+(defcfun (get-prompt-marker "ic_get_prompt_marker") :string
+  "Get the current prompt marker.")
+(defcfun (get-continuation-prompt-marker "ic_get_continuation_prompt_marker") :string
+  "Get the current continuation prompt marker.")
+(defcfun (enable-multiline "ic_enable_multiline") :bool
+  "Disable or enable multi-line input (enabled by default).
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-beep "ic_enable_beep") :bool
+  "Disable or enable sound (enabled by default).
+A beep is used when tab cannot find any completion for example.
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-color "ic_enable_color") :bool
+  "Disable or enable color output (enabled by default).
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-history-duplicates "ic_enable_history_duplicates") :bool
+  "Disable or enable duplicate entries in the history (disabled by default).
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-auto-tab "ic_enable_auto_tab") :bool
+  "to expand as far as possible if the completions are unique. (disabled by default).
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-completion-preview "ic_enable_completion_preview") :bool
+  "Disable or enable preview of a completion selection (enabled by default)
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-multiline-indent "ic_enable_multiline_indent") :bool
+  "Disable or enable automatic identation of continuation lines in multiline
+input so it aligns with the initial prompt.
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-inline-help "ic_enable_inline_help") :bool
+  "Disable or enable display of short help messages for history search etc.
+(full help is always dispayed when pressing F1 regardless of this setting)
+@returns the previous setting."
+  (enable :bool))
+
+(defcfun (enable-hint "ic_enable_hint") :bool
+  "Disable or enable hinting (enabled by default)
+Shows a hint inline when there is a single possible completion.
+@returns the previous setting."
+  (enable :bool))
+
+(defcfun (set-hint-delay "ic_set_hint_delay") :long
+  "Set millisecond delay before a hint is displayed. Can be zero. (500ms by default)."
+  (delay-ms :long))
+
+(defcfun (enable-highlight "ic_enable_highlight") :bool
+  "Disable or enable syntax highlighting (enabled by default).
+This applies regardless whether a syntax highlighter callback was set (`ic_set_highlighter`)
+Returns the previous setting."
+  (enable :bool))
+
+(defcfun (set-tty-esc-delay "ic_set_tty_esc_delay") :void
+  "Set millisecond delay for reading escape sequences in order to distinguish
+a lone ESC from the start of a escape sequence. The defaults are 100ms and 10ms,
+but it may be increased if working with very slow terminals."
+  (initial-delay-ms :long)
+  (followup-delay-ms :long))
+
+(defcfun (enable-brace-matching "ic_enable_brace_matching") :bool
+  "Enable highlighting of matching braces (and error highlight unmatched braces).`"
+  (enable :bool))
+
+(defcfun (set-matching-braces "ic_set_matching_braces") :void
+  "Set matching brace pairs.
+Pass \a NULL for the default `\"()[]{}\"`."
+  (brace-pairs :string))
+
+(defcfun (enable-brace-insertion "ic_enable_brace_insertion") :bool
+  "Enable automatic brace insertion (enabled by default)."
+  (enable :bool))
+
+(defcfun (set-insertion-braces "ic_set_insertion_braces") :void
+  "Set matching brace pairs for automatic insertion.
+Pass \a NULL for the default `()[]{}\"\"''`"
+  (brace-pairs :string))
 
 ;; TODO: Advanced completion
 
 ;; TODO: Character classes
+
+;; Terminal
 
 (defcfun (term-init "ic_term_init") :void
   "Initialize for terminal output.

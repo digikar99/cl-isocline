@@ -57,6 +57,26 @@
            #:highlight
            #:highlight-formatted
 
+           #:set-prompt-marker
+           #:get-prompt-marker
+           #:get-continuation-prompt-marker
+           #:enable-multiline
+           #:enable-beep
+           #:enable-color
+           #:enable-history-duplicates
+           #:enable-auto-tab
+           #:enable-completion-preview
+           #:enable-multiline-indent
+           #:enable-inline-help
+           #:enable-hint
+           #:set-hint-delay
+           #:enable-highlight
+           #:set-tty-esc-delay
+           #:enable-brace-matching
+           #:set-matching-braces
+           #:enable-brace-insertion
+           #:set-insertion-braces
+
            #:term-init
            #:term-done
            #:term-flush
