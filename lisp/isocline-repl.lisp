@@ -214,6 +214,53 @@
   (declare (optimize (speed 1) safety debug))
   (ic:complete-word cenv prefix (cffi:callback word-completer) (cffi:null-pointer)))
 
+(defclass non-interning-cst-client (ecst:cst-client) ())
+(defvar *non-interning-cst-client* (make-instance 'non-interning-cst-client))
+(defstruct uninterned-symbol package name)
+(defstruct non-existent-package (name))
+
+(defmethod ec:interpret-symbol-token ((client non-interning-cst-client)
+                                      (input-stream t)
+                                      (token t)
+                                      (position-package-marker-1 t)
+                                      (position-package-marker-2 t))
+  ;; This is a minor modification of the method with (client t) specialization.
+  ;; The modification is that the call to interpret-symbol has internp set to nil
+  (let ((package-markers-end (or position-package-marker-2
+                                 position-package-marker-1)))
+    (flet ((interpret (package symbol)
+             (handler-bind (((or ec:symbol-is-not-external
+                                 ec:symbol-does-not-exist)
+                              (lambda (c)
+                                (let ((package (ec:desired-symbol-package c))
+                                      (name (ec:desired-symbol-name c)))
+                                  (multiple-value-bind (symbol status) (find-symbol name package)
+                                    (when status
+                                      (setf package (symbol-package symbol))))
+                                  (invoke-restart 'ec::use-value
+                                                  (make-uninterned-symbol
+                                                   :package package
+                                                   :name name)))))
+                            (ec:package-does-not-exist
+                              (lambda (c)
+                                (invoke-restart 'ec::use-value
+                                                (make-non-existent-package
+                                                 :name (ec:desired-package-name c))))))
+               (ec:interpret-symbol client input-stream package symbol nil))))
+      (cond ((null position-package-marker-1)
+             (interpret :current token))
+            ((zerop position-package-marker-1)
+             ;; We use PACKAGE-MARKERS-END so we can handle ::foo
+             ;; which can happen when recovering from errors.
+             (interpret :keyword
+                        (subseq token (1+ package-markers-end))))
+            ((not (null position-package-marker-2))
+             (interpret (subseq token 0 position-package-marker-1)
+                        (subseq token (1+ position-package-marker-2))))
+            (t
+             (interpret (subseq token 0 position-package-marker-1)
+                        (subseq token (1+ position-package-marker-1))))))))
+
 (cffi:defcallback highlighter :void
     ((henv (:pointer (:struct ic:highlight-env)))
      (input :string)
@@ -221,12 +268,10 @@
   (declare (optimize (speed 1) safety debug)
            (ignore arg))
   (multiple-value-bind (input-cst error)
-      (ignore-errors (handler-bind ((ec:package-does-not-exist
-                                      (lambda (c)
-                                        (declare (ignore c))
-                                        (invoke-restart 'ec:recover))))
+      (ignore-errors (handler-bind ()
                        ;; We use ECST because we want to preserve source information
-                       (nth-value 0 (ecst:read-from-string input))))
+                       (let ((ecst::*cst-client* *non-interning-cst-client*))
+                         (nth-value 0 (ecst:read-from-string input)))))
     (labels ((highlight (elt carp)
                (let* ((raw (cst:raw elt))
                       (pos (cst:source elt))
@@ -240,7 +285,14 @@
                                                      (symbol-package raw))
                                              "keyword")
                                            (when (find-class raw nil)
-                                             "type"))))))
+                                             "type")))
+                                      ((uninterned-symbol-p raw)
+                                       (with-slots (name package) raw
+                                         (if carp
+                                             (when (eq package (find-package :cl))
+                                               "keyword")
+                                             (when (find-class (find-symbol name package) nil)
+                                               "type")))))))
                  (when (and start hl-class)
                    (ic:highlight henv start length hl-class))))
              (traverse (tree)
