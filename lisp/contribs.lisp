@@ -19,7 +19,7 @@
                                         :keyword)))))))
             (cons (merge-pathnames #p"contrib/" *sbcl-home*)
                   contrib-dirs))))
-    contrib-names))
+    (remove-duplicates contrib-names)))
 
 (defvar *contrib-blacklist* ())
 
@@ -29,4 +29,5 @@
       (ignore-errors (progn
                        (format t "Requiring ~S~%" c)
                        (force-output)
+                       (asdf:load-system c)
                        (require c))))))
