@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        OS: [ubuntu-24.04]
+        OS: [ubuntu-24.04, ubuntu-24.04-arm]
         lisp: [sbcl_static]
       fail-fast: false
     runs-on: ${{ matrix.OS }}
@@ -26,6 +26,12 @@ jobs:
       run: |
         pwd
         ls -l
+        case $(uname -m) in
+            x86_64) ARCH="x86-64" ;;
+            arm64|aarch64) ARCH="arm64";;
+            *) ARCH=$(uname -m) ;;
+        esac
+        echo "ARCH=${ARCH}" >> ${GITHUB_ENV}
         bash --version
         bash <(curl -s https://raw.githubusercontent.com/digikar99/lisp-travis-lite/master/run.sh)
 
@@ -39,15 +45,19 @@ jobs:
         cmake --build .
 
     - name: Statically link against libisocline + libcrypto, libssl, libtls
+      if: runner.os == 'Linux'
       run: |
         sudo apt install -y libssl-dev libtls-dev
-        SBCL_DIR="sbcl-2.6.3+r00-x86-64-linux"
-        SYS_LIBDIR="/usr/lib/x86_64-linux-gnu"
-        LIBCRYPTO=${SYS_LIBDIR}/libcrypto.a
-        LIBSSL=${SYS_LIBDIR}/libssl.a
-        LIBTLS=${SYS_LIBDIR}/libtls.a
+        SBCL_DIR="sbcl-2.6.3+r00-$ARCH-linux"
+        export SYS_LIBDIR="/usr/lib/"
+
+        LIBCRYPTO=$(find $SYS_LIBDIR -name "libcrypto.a" | head -1)
+        LIBSSL=$(find $SYS_LIBDIR -name "libssl.a" | head -1)
+        LIBTLS=$(find $SYS_LIBDIR -name "libtls.a" | head -1)
         LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
+
         export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBTLS $LIBISOCLINE"
+
         cd "/home/runner/$SBCL_DIR"
         make -C "src/runtime" -f binaries.mk sbcl.extras
         mv "src/runtime/sbcl.extras" "src/runtime/sbcl"
@@ -84,7 +94,7 @@ jobs:
       run: |
         mkdir ${{ env.IC_REPL_DIR }}
         mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.bin
-        cp -r /home/runner/sbcl-2.6.3+r00-x86-64-linux/COPYING* ${{ env.IC_REPL_DIR }}
+        cp -r /home/runner/sbcl-2.6.3+r00-$ARCH-linux/COPYING* ${{ env.IC_REPL_DIR }}
         sudo apt install -y atool
         apack ${{ env.IC_REPL_DIR }}.tar.gz ${{ env.IC_REPL_DIR }}/*
 
@@ -93,7 +103,7 @@ jobs:
       run: |
         mkdir ${{ env.IC_REPL_CIEL_DIR }}
         mv cl-isocline-repl+ciel ${{ env.IC_REPL_CIEL_DIR }}/${{ env.IC_REPL_CIEL_DIR }}.bin
-        cp -r /home/runner/sbcl-2.6.3+r00-x86-64-linux/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
+        cp -r /home/runner/sbcl-2.6.3+r00-$ARCH-linux/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
         sudo apt install -y atool
         apack ${{ env.IC_REPL_CIEL_DIR }}.tar.gz ${{ env.IC_REPL_CIEL_DIR }}/*
 
