@@ -126,9 +126,8 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        LATEST_SHA=$(gh release view latest --json targetCommitish --jq '.targetCommitish')
-        # Resolve to SHA in case it's a branch name
-        LATEST_SHA=$(git rev-parse "origin/$LATEST_SHA" 2>/dev/null || echo "$LATEST_SHA")
+        git fetch --all -t
+        LATEST_SHA=$(git rev-parse latest)
         CURRENT_SHA=$(git rev-parse HEAD)
         echo "Latest: " $LATEST_SHA
         echo "Current: " $CURRENT_SHA
