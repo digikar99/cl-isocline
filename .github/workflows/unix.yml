@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        OS: [ubuntu-24.04, ubuntu-24.04-arm]
+        OS: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel]
         lisp: [sbcl_static]
       fail-fast: false
     runs-on: ${{ matrix.OS }}
@@ -44,23 +44,41 @@ jobs:
         cmake ../..
         cmake --build .
 
-    - name: Statically link against libisocline + libcrypto, libssl, libtls
-      if: runner.os == 'Linux'
+    - name: Install libssl libtls
       run: |
-        sudo apt install -y libssl-dev libtls-dev
-        SBCL_DIR="sbcl-2.6.3+r00-$ARCH-linux"
-        export SYS_LIBDIR="/usr/lib/"
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]' )
+        echo "OS=${OS}" >> ${GITHUB_ENV}
+        if [ "$OS" == "linux" ]; then
+            sudo apt install -y openssl libssl-dev libtls-dev atool
+        elif [ "$OS" == "darwin" ]; then
+            brew install openssl libretls atool
+        fi
+
+    - name: Statically link against libisocline + libcrypto, libssl, libtls
+      run: |
+        case ${OS} in
+            linux) SYS_LIBDIR="/usr/lib/" ;;
+            darwin) SYS_LIBDIR="$(brew --prefix)" ;;
+        esac
 
         LIBCRYPTO=$(find $SYS_LIBDIR -name "libcrypto.a" | head -1)
         LIBSSL=$(find $SYS_LIBDIR -name "libssl.a" | head -1)
         LIBTLS=$(find $SYS_LIBDIR -name "libtls.a" | head -1)
         LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
 
-        export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBTLS $LIBISOCLINE"
+        if [ "$OS" == "linux" ]; then
+            SBCL_DIR="/home/runner/sbcl-2.6.3+r00-$ARCH-$OS"
+            export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBTLS $LIBISOCLINE"
+        elif [ "$OS" == "darwin" ]; then
+            SBCL_DIR="/Users/runner/sbcl-2.6.3+r00-$ARCH-$OS"
+            # -force_load only works on one library at a time
+            export WHOLE_ARCHIVES="-Wl,-force_load $LIBCRYPTO -Wl,-force_load $LIBSSL -Wl $LIBTLS -Wl,-force_load $LIBISOCLINE"
+        fi
 
-        cd "/home/runner/$SBCL_DIR"
+        cd "$SBCL_DIR"
         make -C "src/runtime" -f binaries.mk sbcl.extras
         mv "src/runtime/sbcl.extras" "src/runtime/sbcl"
+        echo "SBCL_DIR=${SBCL_DIR}" >> ${GITHUB_ENV}
 
     - name: Dump lisp image
       run: |
@@ -74,7 +92,6 @@ jobs:
     - name: Dump lisp image with CIEL
       continue-on-error: true
       run: |
-        sudo apt install -y libssl-dev libssl3t64 openssl
         cl --load isocline-repl+ciel.asd \
            --load isocline-repl.asd \
            --load isocline.asd \
@@ -87,15 +104,14 @@ jobs:
 
     - name: Set release name
       run: |
-        echo "IC_REPL_DIR=cl-isocline-repl.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
-        echo "IC_REPL_CIEL_DIR=cl-isocline-repl+ciel.${{ matrix.OS }}.$(uname -m)" >> $GITHUB_ENV
+        echo "IC_REPL_DIR=cl-isocline-repl.${OS}.${ARCH}" >> $GITHUB_ENV
+        echo "IC_REPL_CIEL_DIR=cl-isocline-repl+ciel.${OS}.${ARCH}" >> $GITHUB_ENV
 
     - name: Rename base lisp image and copy licenses
       run: |
         mkdir ${{ env.IC_REPL_DIR }}
         mv cl-isocline-repl ${{ env.IC_REPL_DIR }}/${{ env.IC_REPL_DIR }}.bin
-        cp -r /home/runner/sbcl-2.6.3+r00-$ARCH-linux/COPYING* ${{ env.IC_REPL_DIR }}
-        sudo apt install -y atool
+        cp -r ${SBCL_DIR}/COPYING* ${{ env.IC_REPL_DIR }}
         apack ${{ env.IC_REPL_DIR }}.tar.gz ${{ env.IC_REPL_DIR }}/*
 
     - name: Rename lisp image with CIEL and copy licenses
@@ -103,13 +119,22 @@ jobs:
       run: |
         mkdir ${{ env.IC_REPL_CIEL_DIR }}
         mv cl-isocline-repl+ciel ${{ env.IC_REPL_CIEL_DIR }}/${{ env.IC_REPL_CIEL_DIR }}.bin
-        cp -r /home/runner/sbcl-2.6.3+r00-$ARCH-linux/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
-        sudo apt install -y atool
+        cp -r ${SBCL_DIR}/COPYING* ${{ env.IC_REPL_CIEL_DIR }}
         apack ${{ env.IC_REPL_CIEL_DIR }}.tar.gz ${{ env.IC_REPL_CIEL_DIR }}/*
 
     - name: Upload asset to 'latest' release
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release delete latest --yes --cleanup-tag
-        gh release create latest *.tar.gz
+        LATEST_SHA=$(gh release view latest --json targetCommitish --jq '.targetCommitish')
+        # Resolve to SHA in case it's a branch name
+        LATEST_SHA=$(git rev-parse "origin/$LATEST_SHA" 2>/dev/null || echo "$LATEST_SHA")
+        CURRENT_SHA=$(git rev-parse HEAD)
+        echo "Latest: " $LATEST_SHA
+        echo "Current: " $CURRENT_SHA
+        if [ "$LATEST_SHA" == "$CURRENT_SHA" ]; then
+            gh release upload latest *.tar.gz
+        else
+            gh release delete latest --yes --cleanup-tag
+            gh release create latest *.tar.gz
+        fi
