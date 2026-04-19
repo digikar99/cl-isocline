@@ -309,6 +309,7 @@
   (setf *history-file*
         (uiop:native-namestring
          (merge-pathnames ".cl-isocline-repl" (user-homedir-pathname))))
+  (setf cl:*print-length* 10)
   (ic:set-default-completer (cffi:callback completer) (cffi:null-pointer))
   (ic:set-default-highlighter (cffi:callback highlighter) (cffi:null-pointer))
   (ic:set-prompt-marker "> " "")
