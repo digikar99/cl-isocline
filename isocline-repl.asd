@@ -24,6 +24,9 @@
     (eval (print
            `(push :sb-aclrepl ,(find-symbol "*CONTRIB-BLACKLIST*" :isocline-repl))))
     (uiop:symbol-call :isocline-repl '#:require-all-contribs))
+  (when (and (asdf:component-loaded-p (asdf:find-system "isocline"))
+             (null (uiop:symbol-call :cffi '#:list-foreign-libraries)))
+    (asdf:register-immutable-system "isocline"))
   (uiop:dump-image (asdf:output-file o c)
                    :executable t
                    :compression t))
