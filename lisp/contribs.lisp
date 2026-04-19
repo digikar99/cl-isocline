@@ -29,5 +29,8 @@
       (ignore-errors (progn
                        (format t "Requiring ~S~%" c)
                        (force-output)
-                       (asdf:load-system c)
+                       (let ((system (asdf:find-system c)))
+                         (when system
+                           (asdf:load-system system)
+                           (asdf:register-immutable-system system)))
                        (require c))))))
