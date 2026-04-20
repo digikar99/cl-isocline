@@ -8,10 +8,13 @@
                     (:ec :eclector.reader)
                     (:ecst :eclector.concrete-syntax-tree)
                     (:cst :concrete-syntax-tree))
+  (:shadow #:break)
   (:export #:*history-file*
            #:*read-function*
+           #:debugger
            #:main
-           #:repl))
+           #:repl
+           #:break))
 
 (in-package :isocline-repl)
 
@@ -37,48 +40,47 @@
   (let ((*debug-level* (1+ *debug-level*))
         (*debugger-hook* #'debugger)
         (indent (prompt-indent)))
-    (when (typep condition 'error)
-      (ic:term-style "ic-error")
-      ;; The error
-      (let ((*print-case* :upcase))
-        (ic:print
-         (format nil "  ~A~S: ~A~%~%"
-                 indent
-                 (class-name (class-of condition))
-                 condition)))
-      ;; The backtrace
-      (let ((frame-depth -1))
-        (format *error-output* "  ~ABacktrace:~%" indent)
-        (block print-backtrace
-          (trivial-backtrace:map-backtrace
-           (lambda (frame)
-             (when (and *print-length*
-                        (< *print-length* frame-depth))
-               (return-from print-backtrace nil))
-             (format *error-output*
-                     "  ~A  ~D: (~S ~{~S~^ ~})~%"
-                     indent
-                     (incf frame-depth)
-                     (frame-func frame)
-                     (mapcar #'var-value (frame-vars frame)))))))
+    (ic:term-style "ic-error")
+    ;; The error
+    (let ((*print-case* :upcase))
+      (ic:print
+       (format nil "  ~A~S: ~A~%~%"
+               indent
+               (class-name (class-of condition))
+               condition)))
+    ;; The backtrace
+    (let ((frame-depth -1))
+      (format *error-output* "  ~ABacktrace:~%" indent)
+      (block print-backtrace
+        (trivial-backtrace:map-backtrace
+         (lambda (frame)
+           (when (and *print-length*
+                      (< *print-length* frame-depth))
+             (return-from print-backtrace nil))
+           (format *error-output*
+                   "  ~A  ~D: (~S ~{~S~^ ~})~%"
+                   indent
+                   (incf frame-depth)
+                   (frame-func frame)
+                   (mapcar #'var-value (frame-vars frame)))))))
+    (terpri *error-output*)
+    ;; The restarts
+    (ic:term-style "ic-hint")
+    (let ((*restarts* (compute-restarts condition)))
+      (write-string (with-output-to-string (s)
+                      (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
+                      (loop :for i :from 0
+                            :for r :in *restarts*
+                            :do (format s "  ~A  [:r~D] [~A]: ~A~%"
+                                        indent
+                                        i
+                                        (string-upcase (restart-name r))
+                                        r)))
+                    *error-output*)
       (terpri *error-output*)
-      ;; The restarts
-      (ic:term-style "ic-hint")
-      (let ((*restarts* (compute-restarts condition)))
-        (write-string (with-output-to-string (s)
-                        (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
-                        (loop :for i :from 0
-                              :for r :in *restarts*
-                              :do (format s "  ~A  [:r~D] [~A]: ~A~%"
-                                          indent
-                                          i
-                                          (string-upcase (restart-name r))
-                                          r)))
-                      *error-output*)
-        (terpri *error-output*)
-        (force-output *error-output*)
-        (ic:term-reset)
-        (repl)))))
+      (force-output *error-output*)
+      (ic:term-reset)
+      (repl))))
 
 (defun may-be-invoke-restart (restart)
   (when (keywordp restart)
@@ -94,7 +96,7 @@
   "The reader function used by Isocline REPL.")
 
 (defun read-print-eval-processing-errors (input)
-  (let* ((*debugger-hook* #'debugger)
+  (let* ((*debugger-hook*#'debugger)
          (input (string-trim '(#\space #\tab #\newline #\return) input)))
     (with-input-from-string (in input)
       (loop :while (listen in)
@@ -134,6 +136,19 @@
                    (cffi:foreign-free c-input))
 
       (ic:term-done))))
+
+;; The SBCL 2.6.3 implementation of break as well as the following CLHS issue
+;; recomment that cl:break should set *debugger-hook* to NIL.
+;; Thus, we provide our own break.
+;; http://www.ai.mit.edu/projects/iiip/doc/CommonLISP/HyperSpec/Issues/iss091-writeup.html
+(defun break (&optional (format-control "Break") &rest format-arguments)
+  (with-simple-restart (continue "Return from BREAK.")
+    (let ((*debugger-hook* #'debugger))
+      (invoke-debugger
+       (make-condition 'simple-condition
+                       :format-control format-control
+                       :format-arguments format-arguments))))
+  nil)
 
 (defun terminating-char-p (char)
   (declare (optimize speed))
