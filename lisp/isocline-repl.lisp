@@ -11,6 +11,7 @@
   (:shadow #:break)
   (:export #:*history-file*
            #:*read-function*
+           #:*output-marker*
            #:debugger
            #:main
            #:repl
@@ -95,6 +96,8 @@
 (defvar *read-function* 'cl:read
   "The reader function used by Isocline REPL.")
 
+(defvar *output-marker* ";=>")
+
 (defun read-print-eval-processing-errors (input)
   (let* ((*debugger-hook*#'debugger)
          (input (string-trim '(#\space #\tab #\newline #\return) input)))
@@ -105,7 +108,8 @@
             :do (unless (zerop *debug-level*)
                   (may-be-invoke-restart (first results)))
                 (ic:term-italic t)
-                (ic:println (format nil "~A;=> ~{~S~^, ~}~%" (prompt-indent) results))
+                (ic:println (format nil "~A~A ~{~S~^, ~}~%"
+                                    *output-marker* (prompt-indent) results))
                 (setf cl:*** cl:**
                       cl:** cl:*
                       cl:* (first results)
