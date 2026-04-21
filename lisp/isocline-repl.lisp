@@ -28,13 +28,25 @@
 (defun prompt-indent ()
   (make-string (* 2 *debug-level*) :initial-element #\space))
 
+(defun package-nick-or-name (package)
+  (or (loop :for name :in (package-nicknames package)
+            :with shortest-name := nil
+            :with shortest-len := nil
+            :do (let ((len (length (string name))))
+                  (when (or (null shortest-len)
+                            (< len shortest-len))
+                    (setf shortest-name name
+                          shortest-len  len)))
+            :finally (return shortest-name))
+      (package-name package)))
+
 (defun prompt-string ()
   (if (zerop *debug-level*)
-      (package-name *package*)
+      (package-nick-or-name *package*)
       (format nil "~A\\[~D] ~A"
               (prompt-indent)
               *debug-level*
-              (package-name *package*))))
+              (package-nick-or-name *package*))))
 
 (defun debugger (condition hook)
   (declare (ignore hook))
