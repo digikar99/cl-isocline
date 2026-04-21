@@ -1,0 +1,13 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(progn
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(:isocline-repl) :silent t))
+
+(defun main (&rest argv)
+  (declare (ignore argv))
+  (isocline-repl:main))
