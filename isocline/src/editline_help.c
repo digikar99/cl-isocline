@@ -55,14 +55,14 @@ static const char* help[] = {
   "","",
 
   "", "Editing:",
-  "enter",      "accept current input",
+  "enter",      "create a new line for multi-line input",
   #ifndef __APPLE__
   "^enter, ^j", "",
   "shift-tab",
   #else
   "shift-tab,^j",
   #endif
-                "create a new line for multi-line input",
+		"accept current input",
   //" ",          "(or type '\\' followed by enter)",
   "^l",         "clear screen",
   "^t",         "swap with previous character (move character backward)",

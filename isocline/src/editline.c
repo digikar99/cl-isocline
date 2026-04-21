@@ -921,7 +921,7 @@ static char* edit_line( ic_env_t* env, const char* prompt_text )
     }
 
     // Operations that may return
-    if (c == KEY_ENTER) {
+    if (c == KEY_LINEFEED) {
       if (!env->singleline_only && eb.pos > 0 && 
            sbuf_string(eb.input)[eb.pos-1] == env->multiline_eol && 
             edit_pos_is_at_row_end(env,&eb)) 
@@ -1078,7 +1078,7 @@ static char* edit_line( ic_env_t* env, const char* prompt_text )
 
       // Editing
       case KEY_SHIFT_TAB:
-      case KEY_LINEFEED: // '\n' (ctrl+J, shift+enter)
+      case KEY_ENTER: // '\n' (ctrl+J, shift+enter)
         if (!env->singleline_only) { 
           edit_insert_char(env, &eb, '\n'); 
         }
