@@ -6,19 +6,19 @@
 (alexandria:define-constant +version+ "1.0.4" :test #'cl:string=)
 
 (defcfun (readline "ic_readline") (:pointer :char)
-  "/// Read input from the user using rich editing abilities.
-/// @param prompt_text   The prompt text, can be NULL for the default (\"\").
-///   The displayed prompt becomes `prompt_text` followed by the `prompt_marker` (\"> \").
-/// @returns the heap allocated input on succes, which should be `free`d by the caller.
-///   Returns NULL on error, or if the user typed ctrl+d or ctrl+c.
+  "Read input from the user using rich editing abilities.
+@param prompt_text   The prompt text, can be NULL for the default (\"\").
+  The displayed prompt becomes `prompt_text` followed by the `prompt_marker` (\"> \").
+@returns the heap allocated input on succes, which should be `free`d by the caller.
+  Returns NULL on error, or if the user typed ctrl+d or ctrl+c.
 ///
-/// If the standard input (`stdin`) has no editing capability
-/// (like a dumb terminal (e.g. `TERM`=`dumb`), running in a debuggen, a pipe or redirected file, etc.)
-/// the input is read directly from the input stream up to the
-/// next line without editing capability.
-/// See also \a ic_set_prompt_marker(), \a ic_style_def()
+If the standard input (`stdin`) has no editing capability
+(like a dumb terminal (e.g. `TERM`=`dumb`), running in a debuggen, a pipe or redirected file, etc.)
+the input is read directly from the input stream up to the
+next line without editing capability.
+See also \a ic_set_prompt_marker(), \a ic_style_def()
 ///
-/// @see ic_set_prompt_marker(), ic_style_def()
+@see ic_set_prompt_marker(), ic_style_def()
 "
   (prompt-text :string))
 
@@ -42,11 +42,11 @@
 ;; TODO: vprintf
 
 (defcfun (style-def "ic_style_def") :void
-  "/// Define or redefine a style.
-/// @param style_name The name of the style.
-/// @param fmt        The `fmt` string is the content of a tag and can contain
-///   other styles. This is very useful to theme the output of a program
-///   by assigning standard styles like `em` or `warning` etc."
+  "Define or redefine a style.
+@param style_name The name of the style.
+@param fmt        The `fmt` string is the content of a tag and can contain
+  other styles. This is very useful to theme the output of a program
+  by assigning standard styles like `em` or `warning` etc."
   (style-name :string)
   (fmt :string))
 
