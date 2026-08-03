@@ -188,16 +188,17 @@
                                             (< 0 colon-position)
                                             (char= #\: (char input (1- colon-position))))))
                (pkg-name-end (if (and colon-position
-                                      internal-symbols-p)
-                                 (1- colon-position)
+                                           internal-symbols-p)
+                                 (max 0 (1- colon-position))
                                  colon-position))
 
                (pkg-name-start (when colon-position
-                                 (position-if #'terminating-char-p
-                                                input
-                                                :from-end t
-                                                :end pkg-name-end)))
-               (pkg-prefix (when pkg-name-start
+                                 (or (position-if #'terminating-char-p
+                                                  input
+                                                  :from-end t
+                                                  :end pkg-name-end)
+                                     -1)))
+               (pkg-prefix (when colon-position
                              (subseq input (1+ pkg-name-start) pkg-name-end)))
 
                (*package* (cond (pkg-prefix
@@ -227,11 +228,11 @@
                              (push name symbol-names)))))
                    symbol-names)))
 
-            (loop :for c :in (if pkg-prefix
-                                 (sort symbol-completions #'string<)
-                                 (nconc (sort symbol-completions #'string<)
-                                        (sort pkg-completions #'string<)))
-                  :do (ic:add-completion cenv c))))
+          (loop :for c :in (if pkg-prefix
+                               (sort symbol-completions #'string<)
+                               (nconc (sort symbol-completions #'string<)
+                                      (sort pkg-completions #'string<)))
+                :do (ic:add-completion cenv c))))
 
     (error (c)
       (format *error-output* "Error encountered while completing:~%~%  ~A~%~%" c)
