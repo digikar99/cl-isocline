@@ -12,6 +12,7 @@
   (:export #:*history-file*
            #:*read-function*
            #:*output-marker*
+           #:*debugger-enabled-p*
            #:debugger
            #:main
            #:repl
@@ -22,6 +23,10 @@
 (defvar *history-file*)
 
 (defvar *debug-level* 0)
+
+(defvar *debugger-enabled-p* t
+  "When non-NIL, drops into a debugger where users can evaluate code to
+inspect the stack or invoke a restart.")
 
 (defvar *restarts*)
 
@@ -48,12 +53,9 @@
               *debug-level*
               (package-nick-or-name *package*))))
 
-(defun debugger (condition hook)
-  (declare (ignore hook))
-  (let ((*debug-level* (1+ *debug-level*))
-        (*debugger-hook* #'debugger)
-        (indent (prompt-indent)))
-    (ic:term-style "ic-error")
+(defun print-error-and-backtrace (condition)
+  (ic:term-style "ic-error")
+  (let ((indent (prompt-indent)))
     ;; The error
     (let ((*print-case* :upcase))
       (ic:print
@@ -75,25 +77,36 @@
                    indent
                    (incf frame-depth)
                    (frame-func frame)
-                   (mapcar #'var-value (frame-vars frame)))))))
-    (terpri *error-output*)
-    ;; The restarts
-    (ic:term-style "ic-hint")
-    (let ((*restarts* (compute-restarts condition)))
-      (write-string (with-output-to-string (s)
-                      (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
-                      (loop :for i :from 0
-                            :for r :in *restarts*
-                            :do (format s "  ~A  [:r~D] [~A]: ~A~%"
-                                        indent
-                                        i
-                                        (string-upcase (restart-name r))
-                                        r)))
-                    *error-output*)
-      (terpri *error-output*)
-      (force-output *error-output*)
-      (ic:term-reset)
-      (repl))))
+                   (mapcar #'var-value (frame-vars frame))))))))
+  (ic:term-reset))
+
+(defun debugger (condition hook)
+  (declare (ignore hook))
+  (if *debugger-enabled-p*
+      (let ((*debug-level* (1+ *debug-level*))
+            (*debugger-hook* #'debugger)
+            (indent (prompt-indent)))
+        (print-error-and-backtrace condition)
+        ;; The restarts
+        (ic:term-style "ic-hint")
+        (let ((*restarts* (compute-restarts condition)))
+          (write-string (with-output-to-string (s)
+                          (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
+                          (loop :for i :from 0
+                                :for r :in *restarts*
+                                :do (format s "  ~A  [:r~D] [~A]: ~A~%"
+                                            indent
+                                            i
+                                            (string-upcase (restart-name r))
+                                            r)))
+                        *error-output*)
+          (terpri *error-output*)
+          (force-output *error-output*)
+          (ic:term-reset)
+          (repl)))
+      (progn
+        (print-error-and-backtrace condition)
+        (invoke-restart 'top-level-repl))))
 
 (defun may-be-invoke-restart (restart)
   (when (keywordp restart)
@@ -111,7 +124,7 @@
 (defvar *output-marker* ";=>")
 
 (defun read-print-eval-processing-errors (input)
-  (let* ((*debugger-hook*#'debugger)
+  (let* ((*debugger-hook* #'debugger)
          (input (string-trim '(#\space #\tab #\newline #\return) input)))
     (with-input-from-string (in input)
       (loop :while (listen in)
