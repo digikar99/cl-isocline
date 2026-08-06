@@ -194,25 +194,33 @@ inspect the stack or invoke a restart.")
   (handler-case
       (progn
         (let* ((input (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:input))
+               (input-len (cffi:foreign-funcall "strlen" :pointer input :size))
                (cursor-position (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:cursor))
-               (colon-position (position-if (lambda (c) (char= #\: c)) input :from-end t :end cursor-position))
+               (colon-position (loop :for i :from (1- input-len) :above (1- cursor-position)
+                                     :if (= (char-code #\:)
+                                            (cffi:mem-ref input :char i))
+                                       :do (return i)))
                (internal-symbols-p (or (not colon-position)
                                        (and colon-position
                                             (< 0 colon-position)
-                                            (char= #\: (char input (1- colon-position))))))
+                                            (= (char-code #\:)
+                                               (cffi:mem-ref input :char (1- colon-position))))))
                (pkg-name-end (if (and colon-position
-                                           internal-symbols-p)
+                                      internal-symbols-p)
                                  (max 0 (1- colon-position))
                                  colon-position))
 
                (pkg-name-start (when colon-position
-                                 (or (position-if #'terminating-char-p
-                                                  input
-                                                  :from-end t
-                                                  :end pkg-name-end)
+                                 (or (loop :for i :from (1- input-len) :above (1- pkg-name-end)
+                                           :for ch := (cffi:mem-ref input :char i)
+                                           :if (terminating-char-p (code-char ch))
+                                             :do (return i))
                                      -1)))
                (pkg-prefix (when colon-position
-                             (subseq input (1+ pkg-name-start) pkg-name-end)))
+                             (cffi:foreign-string-to-lisp
+                              input
+                              :offset (1+ pkg-name-start)
+                              :count (- pkg-name-end pkg-name-start 1))))
 
                (*package* (cond (pkg-prefix
                                  (or (find-package (nstring-upcase pkg-prefix))

@@ -66,11 +66,13 @@ See also \a ic_set_prompt_marker(), \a ic_style_def()
 (defcfun (history-clear "ic_history_clear") :void)
 (defcfun (history-add "ic_history_add") :void (entry :string))
 
-;; TODO: Completion
-
 (defcstruct completion-env
   (env :pointer) ; ic_env_t: the isocline environment
-  (input :string) ; current full input
+  ;; We are not making INPUT a :string because it does not play nice
+  ;; with the CURSOR in word-completer of the REPL.
+  ;; Lisp CFFI happily decodes INPUT using UTF-8 encoding
+  ;; However, CURSOR assumes raw bytes.
+  (input (:pointer :char)) ; current full input, const char*
   (cursor :long) ; current cursor position
   (arg :pointer) ; argument given to ic_set_completer
   (closure :pointer) ; free variables for function composition
