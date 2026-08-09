@@ -12,6 +12,7 @@
   (:export #:*history-file*
            #:*read-function*
            #:*output-marker*
+           #:*values-separator*
            #:*debugger-enabled-p*
            #:debugger
            #:main
@@ -122,6 +123,7 @@ inspect the stack or invoke a restart.")
   "The reader function used by Isocline REPL.")
 
 (defvar *output-marker* ";=>")
+(defvar *values-separator* ", ")
 
 (defun read-print-eval-processing-errors (input)
   (let* ((*debugger-hook* #'debugger)
@@ -133,8 +135,15 @@ inspect the stack or invoke a restart.")
             :do (unless (zerop *debug-level*)
                   (may-be-invoke-restart (first results)))
                 (ic:term-italic t)
-                (ic:println (format nil "~A~A ~{~S~^, ~}~%"
-                                    *output-marker* (prompt-indent) results))
+                (ic:println (with-output-to-string (*standard-output*)
+                              (write-string *output-marker*)
+                              (write-string (prompt-indent))
+                              (loop :for i :from 0
+                                    :for result :in results
+                                    :do (unless (zerop i)
+                                          (write-string *values-separator*))
+                                        (write result))
+                              (terpri)))
                 (setf cl:*** cl:**
                       cl:** cl:*
                       cl:* (first results)
