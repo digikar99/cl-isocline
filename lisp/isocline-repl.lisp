@@ -205,7 +205,7 @@ inspect the stack or invoke a restart.")
         (let* ((input (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:input))
                (input-len (cffi:foreign-funcall "strlen" :pointer input :size))
                (cursor-position (cffi:foreign-slot-value cenv '(:struct ic:completion-env) 'ic:cursor))
-               (colon-position (loop :for i :from (1- input-len) :above (1- cursor-position)
+               (colon-position (loop :for i :from cursor-position :above -1
                                      :if (= (char-code #\:)
                                             (cffi:mem-ref input :char i))
                                        :do (return i)))
@@ -220,7 +220,7 @@ inspect the stack or invoke a restart.")
                                  colon-position))
 
                (pkg-name-start (when colon-position
-                                 (or (loop :for i :from (1- input-len) :above (1- pkg-name-end)
+                                 (or (loop :for i :from pkg-name-end :above -1
                                            :for ch := (cffi:mem-ref input :char i)
                                            :if (terminating-char-p (code-char ch))
                                              :do (return i))
