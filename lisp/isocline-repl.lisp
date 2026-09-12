@@ -1,9 +1,5 @@
 (defpackage :isocline-repl
   (:use :cl)
-  (:import-from :trivial-backtrace
-                #:frame-func
-                #:frame-vars
-                #:var-value)
   (:import-from #:styled-strings
                 #:format-styled
                 #:make-styled-string)
@@ -62,20 +58,31 @@ inspect the stack or invoke a restart.")
 (defun eb-cache-color (object color)
   (alexandria:ensure-gethash object *eb-color-map* color))
 
-(defun print-error-and-backtrace (condition)
-  (let ((indent (prompt-indent)))
+(defun backtrace-as-list ()
+  #+sbcl (sb-debug:backtrace-as-list)
+  #+ccl (ccl:backtrace-as-list)
+  #-(or sbcl ccl) (error "Not implemented!"))
+
+(defun print-error-and-backtrace (condition stream)
+  (let ((indent (prompt-indent))
+        (s stream))
     ;; The error
     (let ((*print-case* :upcase))
-      (format *error-output* "~%    ~A" indent)
-      (styled-strings:format-styled *error-output*
+      (format s "~%    ~A" indent)
+      (styled-strings:format-styled s
                                     "~S: ~A"
                                     (list (class-name (class-of condition))
                                           condition)
                                     :foreground :red
                                     :underline t
                                     :italics t)
-      (format *error-output* "~%~%"))
+      (format s "~%~%"))
     ;; The backtrace
+    #-(or sbcl ccl)
+    (pprint-logical-block (s nil :per-line-prefix indent)
+      (uiop:print-backtrace :condition t :stream s)
+      (terpri s))
+    #+(or sbcl ccl)
     (let ((frame-depth -1)
           (colors (set-difference (nconc (alexandria:iota 15 :start 1)
                                          (alexandria:iota 13 :start 39)
@@ -83,36 +90,36 @@ inspect the stack or invoke a restart.")
                                          (alexandria:iota 9 :start 115)
                                          (alexandria:iota 85 :start 147))
                                   '(0 7 15)))
-          (*eb-color-map* (make-hash-table)))
-      (format *error-output* "  ~ABacktrace:~%" indent)
+          ;; CCL provides backtrace arguments as strings!
+          (*eb-color-map* (make-hash-table :test #+sbcl #'eql #+ccl #'equal)))
+      (format s "  ~ABacktrace:~%" indent)
       (block print-backtrace
-        (trivial-backtrace:map-backtrace
-         (lambda (frame)
-           (when (and *print-length*
-                      (< *print-length* frame-depth))
-             (return-from print-backtrace nil))
-           (write-string "  " *error-output*)
-           (write-string indent *error-output*)
-           (write-string "  " *error-output*)
-           (write (incf frame-depth) :stream *error-output*)
-           (write-string " " *error-output*)
-           (write-string "(" *error-output*)
-           (styled-strings:write-styled
-            (frame-func frame)
-            :stream *error-output*
-            :foreground (eb-cache-color (frame-func frame)
-                                        (alexandria:random-elt colors)))
-           (mapcar (lambda (var)
-                     (write-char #\space *error-output*)
-                     (styled-strings:write-styled
-                      (var-value var)
-                      :stream *error-output*
-                      :foreground (eb-cache-color
-                                   (var-value var)
-                                   (alexandria:random-elt colors))))
-                   (frame-vars frame))
-           (write-string ")" *error-output*)
-           (terpri *error-output*))))))
+        (mapc (lambda (funcall)
+                (destructuring-bind (fun &rest fun-args) funcall
+                  (when (and *print-length*
+                             (< *print-length* frame-depth))
+                    (return-from print-backtrace nil))
+                  (write-string "  " s)
+                  (write-string indent s)
+                  (write-string "  " s)
+                  (write (incf frame-depth) :stream s)
+                  (write-string " " s)
+                  (format s "~A"
+                          (list*
+                           (format-styled nil "~S" fun
+                                          :foreground
+                                          (eb-cache-color fun
+                                                          (alexandria:random-elt colors)))
+                           (mapcar (lambda (arg)
+                                     ;; CCL provides arguments as strings!
+                                     (format-styled nil #+ccl "~A" #-ccl "~S" arg
+                                                    :foreground
+                                                    (eb-cache-color arg
+                                                                    (alexandria:random-elt colors))))
+                                   fun-args)))
+                  (terpri s)
+                  (terpri s)))
+              (backtrace-as-list)))))
   (ic:term-reset))
 
 (defun debugger (condition hook)
@@ -121,7 +128,7 @@ inspect the stack or invoke a restart.")
       (let ((*debug-level* (1+ *debug-level*))
             (*debugger-hook* #'debugger)
             (indent (prompt-indent)))
-        (print-error-and-backtrace condition)
+        (print-error-and-backtrace condition *debug-io*)
         ;; The restarts
         (ic:term-style "ic-hint")
         (let ((*restarts* (compute-restarts condition)))
@@ -138,13 +145,13 @@ inspect the stack or invoke a restart.")
                                              :foreground :bright-green)
                                             (format-styled nil "~A" r
                                              :foreground :green))))
-                        *error-output*)
-          (terpri *error-output*)
-          (force-output *error-output*)
+                        *debug-io*)
+          (terpri *debug-io*)
+          (force-output *debug-io*)
           (ic:term-reset)
           (repl)))
       (progn
-        (print-error-and-backtrace condition)
+        (print-error-and-backtrace condition *error-output*)
         (invoke-restart 'top-level-repl))))
 
 (defun may-be-invoke-restart (restart)

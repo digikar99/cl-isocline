@@ -3,7 +3,6 @@
                "eclector-concrete-syntax-tree"
                "ql-https"
                "styled-strings"
-               "trivial-backtrace"
                "uiop")
   :license "MIT"
   :author "Shubhamkar Ayare (digikar@proton.me)"
