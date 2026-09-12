@@ -69,13 +69,12 @@ inspect the stack or invoke a restart.")
     ;; The error
     (let ((*print-case* :upcase))
       (format s "~%    ~A" indent)
-      (styled-strings:format-styled s
-                                    "~S: ~A"
-                                    (list (class-name (class-of condition))
-                                          condition)
-                                    :foreground :red
-                                    :underline t
-                                    :italics t)
+      (format-styled s "~S: ~A"
+                     (list (class-name (class-of condition))
+                           condition)
+                     :foreground :red
+                     :underline t
+                     :italics t)
       (format s "~%~%"))
     ;; The backtrace
     #-(or sbcl ccl)
@@ -104,7 +103,7 @@ inspect the stack or invoke a restart.")
                   (write-string "  " s)
                   (write (incf frame-depth) :stream s)
                   (write-string " " s)
-                  (format s "~A"
+                  (format s "(~{~A~^ ~})~%"
                           (list*
                            (format-styled nil "~S" fun
                                           :foreground
@@ -116,10 +115,9 @@ inspect the stack or invoke a restart.")
                                                     :foreground
                                                     (eb-cache-color arg
                                                                     (alexandria:random-elt colors))))
-                                   fun-args)))
-                  (terpri s)
-                  (terpri s)))
-              (backtrace-as-list)))))
+                                   fun-args)))))
+              (backtrace-as-list)))
+      (terpri s)))
   (ic:term-reset))
 
 (defun debugger (condition hook)
