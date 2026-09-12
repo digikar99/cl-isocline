@@ -13,6 +13,8 @@
            #:*output-marker*
            #:*values-separator*
            #:*debugger-enabled-p*
+           #:backtrace-as-list
+           #:with-truncated-backtrace
            #:debugger
            #:main
            #:repl
@@ -58,12 +60,19 @@ inspect the stack or invoke a restart.")
 (defun eb-cache-color (object color)
   (alexandria:ensure-gethash object *eb-color-map* color))
 
+(defvar *backtrace-top-frame-number* 0)
+
 (defun backtrace-as-list ()
   #+sbcl (sb-debug:backtrace-as-list)
   #+ccl (ccl:backtrace-as-list)
   #-(or sbcl ccl) (error "Not implemented!"))
 
-(defun print-error-and-backtrace (condition stream)
+(defmacro with-truncated-backtrace (() &body body)
+  `(let ((*backtrace-top-frame-number* (length (backtrace-as-list))))
+     (declare (special *backtrace-top-frame-number*))
+     ,@body))
+
+(defun print-error-and-backtrace (condition stream &optional backtrace)
   (let ((indent (prompt-indent))
         (s stream))
     ;; The error
@@ -116,7 +125,7 @@ inspect the stack or invoke a restart.")
                                                     (eb-cache-color arg
                                                                     (alexandria:random-elt colors))))
                                    fun-args)))))
-              (backtrace-as-list)))
+              (butlast backtrace *backtrace-top-frame-number*)))
       (terpri s)))
   (ic:term-reset))
 
@@ -126,7 +135,7 @@ inspect the stack or invoke a restart.")
       (let ((*debug-level* (1+ *debug-level*))
             (*debugger-hook* #'debugger)
             (indent (prompt-indent)))
-        (print-error-and-backtrace condition *debug-io*)
+        (print-error-and-backtrace condition *debug-io* (backtrace-as-list))
         ;; The restarts
         (ic:term-style "ic-hint")
         (let ((*restarts* (compute-restarts condition)))
@@ -149,7 +158,7 @@ inspect the stack or invoke a restart.")
           (ic:term-reset)
           (repl)))
       (progn
-        (print-error-and-backtrace condition *error-output*)
+        (print-error-and-backtrace condition *error-output* (backtrace-as-list))
         (invoke-restart 'top-level-repl))))
 
 (defun may-be-invoke-restart (restart)
@@ -174,7 +183,7 @@ inspect the stack or invoke a restart.")
     (with-input-from-string (in input)
       (loop :while (listen in)
             :for form := (funcall *read-function* in)
-            :for results := (multiple-value-list (eval form))
+            :for results := (multiple-value-list (with-truncated-backtrace () (eval form)))
             :do (unless (zerop *debug-level*)
                   (may-be-invoke-restart (first results)))
                 (ic:term-italic t)
