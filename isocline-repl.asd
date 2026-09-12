@@ -1,7 +1,8 @@
 (asdf:defsystem "isocline-repl"
   :depends-on ("isocline"
-               "ql-https"
                "eclector-concrete-syntax-tree"
+               "ql-https"
+               "styled-strings"
                "trivial-backtrace"
                "uiop")
   :license "MIT"

@@ -4,6 +4,9 @@
                 #:frame-func
                 #:frame-vars
                 #:var-value)
+  (:import-from #:styled-strings
+                #:format-styled
+                #:make-styled-string)
   (:local-nicknames (:ic :isocline)
                     (:ec :eclector.reader)
                     (:ecst :eclector.concrete-syntax-tree)
@@ -54,18 +57,33 @@ inspect the stack or invoke a restart.")
               *debug-level*
               (package-nick-or-name *package*))))
 
+(defvar *eb-color-map*)
+
+(defun eb-cache-color (object color)
+  (alexandria:ensure-gethash object *eb-color-map* color))
+
 (defun print-error-and-backtrace (condition)
-  (ic:term-style "ic-error")
   (let ((indent (prompt-indent)))
     ;; The error
     (let ((*print-case* :upcase))
-      (ic:print
-       (format nil "  ~A~S: ~A~%~%"
-               indent
-               (class-name (class-of condition))
-               condition)))
+      (format *error-output* "~%    ~A" indent)
+      (styled-strings:format-styled *error-output*
+                                    "~S: ~A"
+                                    (list (class-name (class-of condition))
+                                          condition)
+                                    :foreground :red
+                                    :underline t
+                                    :italics t)
+      (format *error-output* "~%~%"))
     ;; The backtrace
-    (let ((frame-depth -1))
+    (let ((frame-depth -1)
+          (colors (set-difference (nconc (alexandria:iota 15 :start 1)
+                                         (alexandria:iota 13 :start 39)
+                                         (alexandria:iota 13 :start 75)
+                                         (alexandria:iota 9 :start 115)
+                                         (alexandria:iota 85 :start 147))
+                                  '(0 7 15)))
+          (*eb-color-map* (make-hash-table)))
       (format *error-output* "  ~ABacktrace:~%" indent)
       (block print-backtrace
         (trivial-backtrace:map-backtrace
@@ -73,12 +91,28 @@ inspect the stack or invoke a restart.")
            (when (and *print-length*
                       (< *print-length* frame-depth))
              (return-from print-backtrace nil))
-           (format *error-output*
-                   "  ~A  ~D: (~S ~{~S~^ ~})~%"
-                   indent
-                   (incf frame-depth)
-                   (frame-func frame)
-                   (mapcar #'var-value (frame-vars frame))))))))
+           (write-string "  " *error-output*)
+           (write-string indent *error-output*)
+           (write-string "  " *error-output*)
+           (write (incf frame-depth) :stream *error-output*)
+           (write-string " " *error-output*)
+           (write-string "(" *error-output*)
+           (styled-strings:write-styled
+            (frame-func frame)
+            :stream *error-output*
+            :foreground (eb-cache-color (frame-func frame)
+                                        (alexandria:random-elt colors)))
+           (mapcar (lambda (var)
+                     (write-char #\space *error-output*)
+                     (styled-strings:write-styled
+                      (var-value var)
+                      :stream *error-output*
+                      :foreground (eb-cache-color
+                                   (var-value var)
+                                   (alexandria:random-elt colors))))
+                   (frame-vars frame))
+           (write-string ")" *error-output*)
+           (terpri *error-output*))))))
   (ic:term-reset))
 
 (defun debugger (condition hook)
@@ -95,11 +129,15 @@ inspect the stack or invoke a restart.")
                           (format s "  ~AAvailable restarts [Type :r1 :r2 etc]:~%" indent)
                           (loop :for i :from 0
                                 :for r :in *restarts*
-                                :do (format s "  ~A  [:r~D] [~A]: ~A~%"
+                                :do (format s "  ~A  [~A] [~A]: ~A~%"
                                             indent
-                                            i
-                                            (string-upcase (restart-name r))
-                                            r)))
+                                            (format-styled nil ":r~D" i
+                                                           :foreground :bright-green)
+                                            (make-styled-string
+                                             (string-upcase (restart-name r))
+                                             :foreground :bright-green)
+                                            (format-styled nil "~A" r
+                                             :foreground :green))))
                         *error-output*)
           (terpri *error-output*)
           (force-output *error-output*)
