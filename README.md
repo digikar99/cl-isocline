@@ -20,10 +20,9 @@ If you are new to Common Lisp, you can head straight to the  [latest release](ht
 | Linux            | Intel/AMD                | [linux.x86-64](https://github.com/digikar99/cl-isocline/releases/download/latest/cl-isocline-repl.linux.x86-64.tar.gz)   |
 | Linux            | Snapdragon / VM@M-series | [linux.arm64](https://github.com/digikar99/cl-isocline/releases/download/latest/cl-isocline-repl.linux.arm64.tar.gz)     |
 
-The binaries contained in the zip or tar.gz are *standalone* binaries. This means they should just work and should not require you to install anything else. This is great if you are still in the initial steps of learning Common Lisp. Later, once you are more familiar with Common Lisp, you can check out Emacs, Slime/Sly, or VS Code and Alive, or the other [editors](https://lispcookbook.github.io/cl-cookbook/editor-support.html).
+The binaries contained in the zip or tar.gz are almost-*standalone* binaries. This means they should just work and should not require you to install anything else. This is great if you are still in the initial steps of learning Common Lisp. Later, once you are more familiar with Common Lisp, you can check out Emacs, Slime/Sly, or VS Code and Alive, or the other [editors](https://lispcookbook.github.io/cl-cookbook/editor-support.html).
 
-But besides the REPL itself, this repository contains the C library [isocline](https://github.com/daanx/isocline) along with a Common Lisp FFI interface to it. Isocline is an alternative to
-libreadline, libedit and the likes. In contrast to the contagious GPL-licensed libreadline, it is
+But besides the REPL itself, this repository contains the C library [isocline](https://github.com/daanx/isocline) along with a Common Lisp FFI interface to it. Isocline is an alternative to libreadline, libedit and the likes. In contrast to the contagious GPL-licensed libreadline, it is
 
 -   MIT licensed
 -   Pure C
@@ -35,24 +34,14 @@ This means it works as an awesome portable repl for Common Lisp, across operatin
 
 The current repository contains source code for version 1.0.9 of Isocline, along with [lisp bindings](lisp/isocline.lisp) and a [simple repl](lisp/isocline-repl.lisp) that also serves as an example for Isocline. This itself is based upon [isocline/test/example.c](isocline/test/isocline.c).
 
-# Contents
+## Contents
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [isocline and isocline-repl (Common Lisp)](#isocline-and-isocline-repl-common-lisp)
-- [Contents](#contents)
 - [Installation](#installation)
     - [A. Binaries](#a-binaries)
     - [B. Compiling from source](#b-compiling-from-source)
-        - [1. Get a Lisp compiler (or interpreter)](#1-get-a-lisp-compiler-or-interpreter)
-            - [Linux](#linux)
-            - [MacOS](#macos)
-            - [Windows](#windows)
-        - [2. Install the quicklisp client](#2-install-the-quicklisp-client)
-        - [3. Install ultralisp](#3-install-ultralisp)
-        - [4. Run isocline-repl](#4-run-isocline-repl)
-        - [5. Making the binary](#5-making-the-binary)
     - [C. Roswell](#c-roswell)
 - [TODO](#todo)
 - [API Reference](#api-reference)
@@ -157,73 +146,44 @@ pacman -S git openssl
 
 ## B. Compiling from source
 
-### 1. Get a C and Lisp compiler (or interpreter)
+Alternatively, you can use [pixi](https://pixi.prefix.dev/) which I highly recommend.
 
-We default to [sbcl](http://sbcl.org).
+After installing pixi,
 
-#### Linux
+1. Clone this repository and change directory:
 
-```sh
-sudo apt install sbcl gcc
+```
+git clone https://github.com/digikar99/isocline && cd isocline
 ```
 
-#### MacOS
+2. Start a pixi project:
 
-Install [homebrew](https://brew.sh) if you don't have it:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+pixi install
 ```
 
-Install sbcl and gcc
+3. Run sbcl and call `isocline-repl:main`
 
-```sh
-brew install sbcl gcc
+```
+pixi run sbcl --no-userinit \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system "isocline-repl")' \
+  --eval '(isocline-repl:main)'
 ```
 
-#### Windows
+4. Optionally, make a binary, and run it:
 
-1. Install [MSYS2](https://www.msys2.org/).
-2. Launch the "MSYS2 MINGW" terminal.
-3. `pacman -S mingw-w64-x86_64-sbcl mingw-w64-x86_64-gcc`
-
-### 2. Install the quicklisp client
-
-[rudolfochrist/ql-https](https://github.com/rudolfochrist/ql-https) is a quicklisp client variant that uses https.
-
-```sh
-curl https://raw.githubusercontent.com/rudolfochrist/ql-https/master/install.sh | bash
 ```
+pixi run sbcl --no-userinit \
+  --eval '(require :asdf)' \
+  --eval '(asdf:make "isocline-repl")'
 
-### 3. Install ultralisp
-
-```lisp
-;; ql-https will upgrade the URLs from http to https
-(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)
-```
-
-### 4. Run isocline-repl
-
-If you have ultralisp installed, then you can
-
-```lisp
-(ql:quickload "isocline-repl")
-(isocline-repl:main)
-```
-
-This assumes you have `gcc` installed. It will be used to compile `libisocline.so` from the sources. By default, isocline depends on the foreign library. However, the [github action workflow](./github/workflows) has been set up to use [sbcl-goodies](https://github.com/sionescu/sbcl-goodies) to build and statically link libisocline.a into the lisp image. These lisp images can then be used as standalone programs without any dependencies on *extra* foreign libraries.
-
-### 5. Making the binary
-
-The following should create a `cl-isocline-repl` in the root directory of `isocline-repl`.
-
-```lisp
-(asdf:make "isocline-repl")
+./isocline-repl
 ```
 
 ## C. Roswell
 
-Note: For portability reasons, roswell does not ship with ql-https. Thus, you should set it up roswell's quicklisp with https support using the steps [here](https://github.com/rudolfochrist/ql-https). The simplest can be to symlink `.roswell/lisp/quicklisp` to the default quicklisp installation `~/quicklisp`. 
+Note: For portability reasons, roswell does not ship with ql-https. Thus, you should set it up roswell's quicklisp with https support using the steps [here](https://github.com/rudolfochrist/ql-https). The simplest can be to symlink `.roswell/lisp/quicklisp` to the default quicklisp installation `~/quicklisp`.
 
 ```
 ln -s ~/quicklisp ~/.roswell/lisp/quicklisp

@@ -1,0 +1,15 @@
+[workspace]
+authors = ["digikar99 <digikar@proton.me>"]
+channels = ["https://prefix.dev/conda-forge", "https://prefix.dev/digikar/common-lisp", "conda-forge"]
+name = "isocline"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+alexandria = ">=0.0.0.2026.5.12,<0.0.0.2027"
+cl-cffi = ">=0.24.1.2026.8.21,<0.25"
+concrete-syntax-tree = ">=0.3.0,<0.4"
+eclector = ">=0.12.0,<0.13"
+styled-strings = ">=0.0.0.2026.9.12,<0.0.0.2027"
