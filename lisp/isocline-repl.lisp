@@ -124,7 +124,7 @@ inspect the stack or invoke a restart.")
                   (write-string indent s)
                   (write-string "  " s)
                   (write (incf frame-depth) :stream s)
-                  (write-string " " s)
+                  (write-string ": " s)
                   (format s "(~{~A~^ ~})~%"
                           (list*
                            (format-styled nil "~S" fun
