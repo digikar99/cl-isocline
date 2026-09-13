@@ -57,8 +57,13 @@ inspect the stack or invoke a restart.")
 
 (defvar *eb-color-map*)
 
-(defun eb-cache-color (object color)
-  (alexandria:ensure-gethash object *eb-color-map* color))
+(defun eb-cache-color (object &optional color)
+  (let ((count (car (alexandria:ensure-gethash object *eb-color-map* (cons 0 color)))))
+    (when color
+      (setf (gethash object *eb-color-map*) (cons (incf count) color)))
+    (if (> count 1)
+        (cdr (gethash object *eb-color-map*))
+        nil)))
 
 (defvar *backtrace-top-frame-number* 0)
 
@@ -97,11 +102,19 @@ inspect the stack or invoke a restart.")
                                          (alexandria:iota 13 :start 75)
                                          (alexandria:iota 9 :start 115)
                                          (alexandria:iota 85 :start 147))
+                                  ;; Exclude lighter shades
                                   '(0 7 15)))
           ;; CCL provides backtrace arguments as strings!
           (*eb-color-map* (make-hash-table :test #+sbcl #'eql #+ccl #'equal)))
       (format s "  ~ABacktrace:~%" indent)
       (block print-backtrace
+        (mapc (lambda (funcall)
+                (destructuring-bind (fun &rest fun-args) funcall
+                  (eb-cache-color fun (alexandria:random-elt colors))
+                  (mapcar (lambda (arg)
+                            (eb-cache-color arg (alexandria:random-elt colors)))
+                          fun-args)))
+              (butlast backtrace *backtrace-top-frame-number*))
         (mapc (lambda (funcall)
                 (destructuring-bind (fun &rest fun-args) funcall
                   (when (and *print-length*
@@ -115,15 +128,11 @@ inspect the stack or invoke a restart.")
                   (format s "(~{~A~^ ~})~%"
                           (list*
                            (format-styled nil "~S" fun
-                                          :foreground
-                                          (eb-cache-color fun
-                                                          (alexandria:random-elt colors)))
+                                          :foreground (eb-cache-color fun))
                            (mapcar (lambda (arg)
                                      ;; CCL provides arguments as strings!
                                      (format-styled nil #+ccl "~A" #-ccl "~S" arg
-                                                    :foreground
-                                                    (eb-cache-color arg
-                                                                    (alexandria:random-elt colors))))
+                                                    :foreground (eb-cache-color arg)))
                                    fun-args)))))
               (butlast backtrace *backtrace-top-frame-number*)))
       (terpri s)))
