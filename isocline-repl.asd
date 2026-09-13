@@ -1,7 +1,6 @@
 (asdf:defsystem "isocline-repl"
   :depends-on ("isocline"
                "eclector-concrete-syntax-tree"
-               "ql-https"
                "styled-strings"
                "uiop")
   :license "MIT"
@@ -13,7 +12,7 @@
   :entry-point "isocline-repl:main"
   :components ((:file "isocline-repl")
                (:file "contribs" :if-feature :sbcl)
-               (:file "ql-https")))
+               (:file "ql-https" :if-feature :ql-https)))
 
 
 #+sb-core-compression
