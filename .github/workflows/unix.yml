@@ -84,6 +84,7 @@ jobs:
       run: |
         cl --load isocline-repl.asd \
            --load isocline.asd \
+           --eval '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)' \
            --eval '(ql:quickload "isocline-repl")' \
            --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
            --eval '(asdf:make "isocline-repl")' \
@@ -92,11 +93,14 @@ jobs:
     - name: Dump lisp image with CIEL
       continue-on-error: true
       run: |
+        CIEL=2026-09-17
+        wget https://github.com/digikar99/ciel-libraries/releases/download/weekly-$CIEL/ciel-libraries-$CIEL.tar.gz
+        atool -x ciel-libraries-$CIEL.tar.gz
+        mv ciel-libraries-$CIEL/* $HOME/quicklisp/local-projects/
         cl --load isocline-repl+ciel.asd \
            --load isocline-repl.asd \
            --load isocline.asd \
-           --eval '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)' \
-           --eval '(ql:quickload "isocline-repl+ciel")' \
+           --eval '(asdf:load-system "isocline-repl+ciel")' \
            --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
            --eval "(cl:in-package :ciel-user)" \
            --eval '(asdf:make "isocline-repl+ciel")' \
