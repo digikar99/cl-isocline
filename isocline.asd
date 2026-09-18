@@ -1,6 +1,7 @@
 (asdf:defsystem "isocline"
   :depends-on ("alexandria"
                "cffi"
+               "cffi-toolchain"
                "uiop")
   :license "MIT"
   :author "Shubhamkar Ayare (digikar@proton.me)"
