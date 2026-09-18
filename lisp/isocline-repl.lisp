@@ -127,11 +127,11 @@ inspect the stack or invoke a restart.")
                   (write-string ": " s)
                   (format s "(~{~A~^ ~})~%"
                           (list*
-                           (format-styled nil "~S" fun
+                           (format-styled nil "~S" (list fun)
                                           :foreground (eb-cache-color fun))
                            (mapcar (lambda (arg)
                                      ;; CCL provides arguments as strings!
-                                     (format-styled nil #+ccl "~A" #-ccl "~S" arg
+                                     (format-styled nil #+ccl "~A" #-ccl "~S" (list arg)
                                                     :foreground (eb-cache-color arg)))
                                    fun-args)))))
               (butlast backtrace *backtrace-top-frame-number*)))
@@ -154,12 +154,12 @@ inspect the stack or invoke a restart.")
                                 :for r :in *restarts*
                                 :do (format s "  ~A  [~A] [~A]: ~A~%"
                                             indent
-                                            (format-styled nil ":r~D" i
+                                            (format-styled nil ":r~D" (list i)
                                                            :foreground :bright-green)
                                             (make-styled-string
                                              (string-upcase (restart-name r))
                                              :foreground :bright-green)
-                                            (format-styled nil "~A" r
+                                            (format-styled nil "~A" (list r)
                                              :foreground :green))))
                         *debug-io*)
           (terpri *debug-io*)
