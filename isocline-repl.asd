@@ -16,7 +16,7 @@
 
 
 #+sb-core-compression
-(defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
+(defmethod asdf:perform ((o asdf:image-op) (c (eql (asdf:find-system "isocline-repl"))))
   ;; I had first developed the contrib part for "SBCL-PLUS-CONTRIB" which is supposed
   ;; to be an SBCL image with all the contribs already loaded.
   (when (member :sbcl cl:*features*)
