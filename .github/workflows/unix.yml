@@ -97,6 +97,7 @@ jobs:
         wget https://github.com/digikar99/ciel-libraries/releases/download/weekly-$CIEL/ciel-libraries-$CIEL.tar.gz
         atool -x ciel-libraries-$CIEL.tar.gz
         mv ciel-libraries-$CIEL/* $HOME/quicklisp/local-projects/
+        rm ciel-libraries-$CIEL.tar.gz
         cl --load isocline-repl+ciel.asd \
            --load isocline-repl.asd \
            --load isocline.asd \
