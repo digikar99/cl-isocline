@@ -82,9 +82,9 @@ jobs:
 
     - name: Dump lisp image
       run: |
+        git clone https://codeberg.org/digikar/styled-strings.git $HOME/quicklisp/local-projects/styled-strings
         cl --load isocline-repl.asd \
            --load isocline.asd \
-           --eval '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)' \
            --eval '(ql:quickload "isocline-repl")' \
            --eval "(cffi:close-foreign-library 'isocline::libisocline)"\
            --eval '(asdf:make "isocline-repl")' \
