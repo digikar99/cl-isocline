@@ -8,7 +8,7 @@ isocline and isocline-repl (Common Lisp)
 - syntax highlighting
 - basic debugging
 
-![](demo.gif)
+[![Demo](https://img.youtube.com/vi/WrixhJfSiws/maxresdefault.jpg)](https://www.youtube.com/watch?v=WrixhJfSiws)
 
 If you are new to Common Lisp, you can head straight to the  [latest release](https://github.com/digikar99/cl-isocline/releases/latest/) and grab a
 
