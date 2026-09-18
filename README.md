@@ -153,7 +153,7 @@ After installing pixi,
 1. Clone this repository and change directory:
 
 ```
-git clone https://github.com/digikar99/isocline && cd isocline
+git clone https://github.com/digikar99/cl-isocline && cd cl-isocline
 ```
 
 2. Start a pixi project:
