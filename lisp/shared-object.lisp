@@ -16,8 +16,12 @@
             (cl:unless (cl:probe-file shared-library-pathname)
               (uiop:with-current-directory (*isocline-root-directory*)
                 (uiop:run-program
-                 (cl:format cl:nil "gcc -shared -o ~A -Iinclude -fpic isocline/src/isocline.c"
-                            (cl:file-namestring shared-library-pathname))
+                 (cl:list cffi-toolchain:*cc*
+                          "-shared" "-o"
+                          (cl:file-namestring shared-library-pathname)
+                          "-Iinclude"
+                          "-fpic"
+                          "isocline/src/isocline.c")
                  :output cl:t
                  :error-output cl:t)))
             shared-library-pathname)))
