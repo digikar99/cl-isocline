@@ -156,30 +156,13 @@ After installing pixi,
 git clone https://github.com/digikar99/cl-isocline && cd cl-isocline
 ```
 
-2. Start a pixi project:
+2. Run
 
 ```
-pixi install
+pixi -q run cl-isocline
 ```
 
-3. Run sbcl and call `isocline-repl:main`
-
-```
-pixi run sbcl --no-userinit \
-  --eval '(require :asdf)' \
-  --eval '(asdf:load-system "isocline-repl")' \
-  --eval '(isocline-repl:main)'
-```
-
-4. Optionally, make a binary, and run it:
-
-```
-pixi run sbcl --no-userinit \
-  --eval '(require :asdf)' \
-  --eval '(asdf:make "isocline-repl")'
-
-./isocline-repl
-```
+This single step (i) installs sbcl and all dependencies (ii) compiles isocline repl (iii) runs the REPL
 
 ## C. Roswell
 

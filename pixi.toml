@@ -7,6 +7,9 @@ version = "0.1.0"
 
 [tasks]
 
+build = "sbcl --noinform --no-userinit --eval '(require :asdf)' --eval '(asdf:make \"isocline-repl\")' --eval '(uiop:quit)'"
+cl-isocline = { cmd = "./cl-isocline-repl", depends-on = ["build"] }
+
 [dependencies]
 alexandria = ">=0.0.0.2026.5.12,<0.0.0.2027"
 cl-cffi = ">=0.24.1.2026.8.21,<0.25"
