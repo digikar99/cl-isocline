@@ -10,14 +10,12 @@ jobs:
         OS: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel]
         lisp: [sbcl_static]
       fail-fast: false
+    container: ${{ contains(matrix.OS, 'ubuntu') && 'ghcr.io/digikar99/oldglibc-openssl35-commonlisp:glibc_2_28' || '' }}
     runs-on: ${{ matrix.OS }}
-
-    # NOTE: PWD = GITHUB_WORKSPACE = /home/runner/work/cl-repl/cl-repl = ~/work/cl-repl/cl-repl
-    #       HOME = /home/runner
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Download implementation
       env:
@@ -32,8 +30,20 @@ jobs:
             *) ARCH=$(uname -m) ;;
         esac
         echo "ARCH=${ARCH}" >> ${GITHUB_ENV}
+        echo "${HOME}/.local/bin" >> "$GITHUB_PATH"
+        export PATH="${HOME}/.local/bin:${PATH}"
         bash --version
-        bash <(curl -s https://raw.githubusercontent.com/digikar99/lisp-travis-lite/master/run.sh)
+        curl -s https://raw.githubusercontent.com/digikar99/lisp-travis-lite/master/run.sh | bash
+
+    - name: Install libssl libtls for MacOS
+      run: |
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]' )
+        echo "OS=${OS}" >> ${GITHUB_ENV}
+        if [ "$OS" == "linux" ]; then
+            yum -y install atool
+        elif [ "$OS" == "darwin" ]; then
+            brew install openssl libretls atool
+        fi
 
     - name: Compile isocline
       run: |
@@ -41,36 +51,30 @@ jobs:
         cd isocline/
         mkdir -p build/release
         cd build/release
-        cmake ../..
+        case ${OS} in
+            linux) cmake ../.. --install-prefix $STATIC_PREFIX ;;
+            darwin) cmake ../.. ;;
+        esac
         cmake --build .
-
-    - name: Install libssl libtls
-      run: |
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]' )
-        echo "OS=${OS}" >> ${GITHUB_ENV}
-        if [ "$OS" == "linux" ]; then
-            sudo apt install -y openssl libssl-dev libtls-dev atool
-        elif [ "$OS" == "darwin" ]; then
-            brew install openssl libretls atool
-        fi
 
     - name: Statically link against libisocline + libcrypto, libssl, libtls
       run: |
         case ${OS} in
-            linux) SYS_LIBDIR="/usr/lib/" ;;
+            linux) SYS_LIBDIR="$STATIC_PREFIX" ;;
             darwin) SYS_LIBDIR="$(brew --prefix)" ;;
         esac
 
         LIBCRYPTO=$(find $SYS_LIBDIR -name "libcrypto.a" | head -1)
         LIBSSL=$(find $SYS_LIBDIR -name "libssl.a" | head -1)
         LIBTLS=$(find $SYS_LIBDIR -name "libtls.a" | head -1)
+        LIBZSTD=$(find $SYS_LIBDIR -name "libzstd.a" | head -1)
         LIBISOCLINE="$PWD/isocline/build/release/libisocline.a"
 
         if [ "$OS" == "linux" ]; then
-            SBCL_DIR="/home/runner/sbcl-2.6.6+r00-$ARCH-$OS"
-            export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBTLS $LIBISOCLINE"
+            SBCL_DIR="/github/home/sbcl-2.6.8+r00-$ARCH-$OS"
+            export WHOLE_ARCHIVES="-Wl,--whole-archive $LIBCRYPTO $LIBSSL $LIBISOCLINE -Wl,--no-whole-archive $LIBTLS"
         elif [ "$OS" == "darwin" ]; then
-            SBCL_DIR="/Users/runner/sbcl-2.6.6+r00-$ARCH-$OS"
+            SBCL_DIR="/Users/runner/sbcl-2.6.8+r00-$ARCH-$OS"
             # -force_load only works on one library at a time
             export WHOLE_ARCHIVES="-Wl,-force_load $LIBCRYPTO -Wl,-force_load $LIBSSL -Wl $LIBTLS -Wl,-force_load $LIBISOCLINE"
         fi
@@ -131,6 +135,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        git config --global --add safe.directory /__w/cl-isocline/cl-isocline
         git fetch --all -t
         LATEST_SHA=$(git rev-parse latest)
         CURRENT_SHA=$(git rev-parse HEAD)
