@@ -108,6 +108,7 @@ jobs:
         apack ${{ env.IC_REPL_CIEL_DIR }}.zip ${{ env.IC_REPL_CIEL_DIR }}/*
 
     - name: Upload asset to 'latest' release
+      shell: bash
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
