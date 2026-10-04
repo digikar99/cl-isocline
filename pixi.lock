@@ -42,17 +42,17 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/libstdcxx-devel_linux-64-15.3.0-hb2c5482_107.conda
       - conda: https://prefix.dev/conda-forge/noarch/sysroot_linux-64-2.28-h4ee821c_9.conda
       - conda: https://prefix.dev/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
       osx-arm64:
       - conda: https://prefix.dev/conda-forge/noarch/ca-certificates-2026.7.22-hbd8a1cb_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/compiler-rt21_osx-arm64-21.1.8-hb8825d9_2.conda
@@ -82,22 +82,22 @@ environments:
       - conda: https://prefix.dev/conda-forge/osx-arm64/llvm-tools-21-21.1.8-h79441dc_1.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/llvm-tools-21.1.8-hdb3d66b_1.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/ncurses-6.6-he64c551_1.conda
-      - conda: https://prefix.dev/conda-forge/osx-arm64/openssl-3.6.4-h55eecbc_0.conda
+      - conda: https://prefix.dev/conda-forge/osx-arm64/openssl-3.6.5-h55eecbc_0.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/sbcl-2.6.9-h74c22ad_0.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/sigtool-codesign-0.1.3-h98dc951_1.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/tapi-1600.0.11.8-hb561403_4.conda
       - conda: https://prefix.dev/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
       win-64:
       - conda: https://prefix.dev/conda-forge/noarch/vswhere-3.1.7-h40126e0_1.conda
       - conda: https://prefix.dev/conda-forge/win-64/_openmp_mutex-4.5-20_gnu.conda
@@ -113,17 +113,17 @@ environments:
       - conda: https://prefix.dev/conda-forge/win-64/vcomp14-14.51.36247-habf1de7_41.conda
       - conda: https://prefix.dev/conda-forge/win-64/vs2022_win-64-19.44.35207-ha74f236_41.conda
       - conda: https://prefix.dev/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
-      - conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
+      - conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
 packages:
 - conda: https://prefix.dev/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
   build_number: 20
@@ -747,9 +747,9 @@ packages:
     - ncurses >=6.6,<7.0a0
   size: 804298
   timestamp: 1786355189145
-- conda: https://prefix.dev/conda-forge/osx-arm64/openssl-3.6.4-h55eecbc_0.conda
-  sha256: f23239eacd75c4c50705e68fae1aa3292da473e6a3a4abe2330f1e6afa680704
-  md5: ae71ab40048c19a389a7dcccb86c2481
+- conda: https://prefix.dev/conda-forge/osx-arm64/openssl-3.6.5-h55eecbc_0.conda
+  sha256: 44fbc526456571a9fb8fa18157f6f269d4d4bd40eef20183a93b9c9296f94497
+  md5: 45d9179cdf6e53d88aec034246f0dad6
   depends:
   - __osx >=11.0
   - ca-certificates
@@ -757,9 +757,9 @@ packages:
   license_family: Apache
   run_exports:
     weak:
-    - openssl >=3.6.4,<4.0a0
-  size: 3110142
-  timestamp: 1787698648639
+    - openssl >=3.6.5,<4.0a0
+  size: 3111573
+  timestamp: 1791097959641
 - conda: https://prefix.dev/conda-forge/osx-arm64/sbcl-2.6.9-h74c22ad_0.conda
   sha256: ab48b7303ee07286d0d7a73434b54108257e0e17c925099a65d2c46cdc10bf9b
   md5: 0f64d40bdacfda9457298688f472b17b
@@ -985,7 +985,7 @@ packages:
     - zstd >=1.5.7,<1.6.0a0
   size: 387535
   timestamp: 1786599623274
-- conda: https://prefix.dev/digikar/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/acclimation-0.0.0.2024.05.20-h4616a5c_0.conda
   sha256: bcd0e2adbfca2bedffa0caa49d22c9def9d72aedeaa036e74016485ad200959f
   md5: 83bda4734bc02e0f601c29d85f1cef4c
   depends:
@@ -996,7 +996,7 @@ packages:
   run_exports: {}
   size: 12048
   timestamp: 1788986564049
-- conda: https://prefix.dev/digikar/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/alexandria-0.0.0.2026.05.12-h4616a5c_0.conda
   sha256: 2b54ed25213fd1986b77760cbbe981b169d1be75425424359625555631631010
   md5: a2a0b0131e697e808e5d52095b3dfd6c
   depends:
@@ -1007,7 +1007,7 @@ packages:
   run_exports: {}
   size: 60877
   timestamp: 1788616769361
-- conda: https://prefix.dev/digikar/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-asdf-3.3.7.4-h4616a5c_2.conda
   sha256: 1ed6d342944e127350f86f794f4f0c850ed3aa98e52170a4911e106209c40f57
   md5: 4b75e34af3127c0dfbfddbb336e2f98f
   depends:
@@ -1017,7 +1017,7 @@ packages:
   run_exports: {}
   size: 458726
   timestamp: 1789325144124
-- conda: https://prefix.dev/digikar/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-babel-0.0.0.2025.09.05-h4616a5c_0.conda
   sha256: fc2be6d9c7643cc0816f360254a2f5394704677e0a4324ae44e4118f686e3550
   md5: 0f06a3977efc79ba42c5b567f446ec6a
   depends:
@@ -1031,7 +1031,7 @@ packages:
   run_exports: {}
   size: 242707
   timestamp: 1788632792354
-- conda: https://prefix.dev/digikar/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/cl-cffi-0.24.1.2026.08.21-h39481bf_3.conda
   sha256: 1b8235a571de42446fe139cd79d85408e8892cc6a696679fbea1c54ad060a49a
   md5: 248f8302f00df1120a9cb733b1549e91
   depends:
@@ -1045,7 +1045,7 @@ packages:
   run_exports: {}
   size: 105037
   timestamp: 1790974900738
-- conda: https://prefix.dev/digikar/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/closer-mop-0.0.0.2026.08.29-h4616a5c_0.conda
   sha256: 23690ac0a8319f73f413acf5028b55236b6b87cbc4300054e38478820c1c9417
   md5: 09d346f2e02f8d8369ed0f655a5d73b6
   depends:
@@ -1056,7 +1056,7 @@ packages:
   run_exports: {}
   size: 25724
   timestamp: 1788617877877
-- conda: https://prefix.dev/digikar/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/concrete-syntax-tree-0.3.0-h4616a5c_0.conda
   sha256: 8562a1256c00f4b32dbc139491593513d4b90ec10cfe7075dcf4b272f5866bd4
   md5: d53a1527abe9b53e99e60084c3fff11f
   depends:
@@ -1068,7 +1068,7 @@ packages:
   run_exports: {}
   size: 59224
   timestamp: 1788987061506
-- conda: https://prefix.dev/digikar/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/eclector-0.12.0-h4616a5c_0.conda
   sha256: 00bc1b17bd06bae864d392d44e45e6fa75adb4afa514428d54f6413ade47f9d2
   md5: 5d43876e244ff6e44fd8651e291ef005
   depends:
@@ -1082,7 +1082,7 @@ packages:
   run_exports: {}
   size: 2822017
   timestamp: 1788987526312
-- conda: https://prefix.dev/digikar/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/styled-strings-0.0.0.2026.09.26-h4616a5c_0.conda
   sha256: 05c108d01ac09da0dd3b3cfda4ff147826343d5960118823c99592782d73998c
   md5: 8f99df049ba5cbae08482d9cf0ba2a89
   depends:
@@ -1094,7 +1094,7 @@ packages:
   run_exports: {}
   size: 67474
   timestamp: 1790495957150
-- conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-features-0.0.0.2026.09.08-h4616a5c_0.conda
   sha256: 84c464808b06aebb49db113e7f1243581ec7350c2eecacfe31b7a2e25dbf5913
   md5: 24603bb4f105290a9ff8a008c396bf0b
   depends:
@@ -1105,7 +1105,7 @@ packages:
   run_exports: {}
   size: 16993
   timestamp: 1789251525820
-- conda: https://prefix.dev/digikar/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
+- conda: https://prefix.dev/common-lisp/common-lisp/noarch/trivial-gray-streams-0.0.0.2026.08.17-h4616a5c_0.conda
   sha256: e4beb9d78eece3dc43eb0d916ba72de37a7a8f807665faac697180fe5e9cd3ea
   md5: 545e8af8729a2bda70b363b8718d2e4f
   depends:
