@@ -130,9 +130,20 @@ inspect the stack or invoke a restart.")
                            (format-styled nil "~S" (list fun)
                                           :foreground (eb-cache-color fun))
                            (mapcar (lambda (arg)
+                                     (when (stringp arg)
+                                       (let ((nl (position-if
+                                                  (lambda (c)
+                                                    (member c '(#\newline #\return)))
+                                                  arg)))
+                                         (when nl
+                                           (setf arg (concatenate 'string
+                                                                  (subseq arg 0 nl)
+                                                                  "\\n...")))))
                                      ;; CCL provides arguments as strings!
-                                     (format-styled nil #+ccl "~A" #-ccl "~S" (list arg)
-                                                    :foreground (eb-cache-color arg)))
+                                     (format-styled nil #+ccl "~A"
+                                                        #-ccl "~S"
+                                                        (list arg)
+                                                        :foreground (eb-cache-color arg)))
                                    fun-args)))))
               (butlast backtrace *backtrace-top-frame-number*)))
       (terpri s)))
