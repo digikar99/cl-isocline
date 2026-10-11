@@ -17,6 +17,7 @@
            #:with-truncated-backtrace
            #:debugger
            #:main
+           #:with-top-level-repl-restart
            #:repl
            #:break))
 
@@ -225,6 +226,12 @@ inspect the stack or invoke a restart.")
                 (ic:term-reset)))))
 
 
+(defmacro with-top-level-repl-restart (&body body)
+  `(with-simple-restart
+       (top-level-repl
+        "Ignore errors and skip to the top-level of the interactive REPL")
+     ,@body))
+
 
 (defun repl ()
 
@@ -232,18 +239,18 @@ inspect the stack or invoke a restart.")
 
     (unwind-protect
 
-         (loop :initially (ic:set-history *history-file* -1)
-                          (ic:term-init)
-               :for c-input := (ic:readline (prompt-string))
-               :until (cffi:null-pointer-p c-input)
-               :for input := (cffi:foreign-string-to-lisp c-input)
-               :do (if (zerop *debug-level*)
-                       (with-simple-restart
-                           (top-level-repl
-                            "Ignore errors and skip to the top-level of the interactive REPL")
-                         (read-print-eval-processing-errors input))
-                       (read-print-eval-processing-errors input))
-                   (cffi:foreign-free c-input))
+         (flet ((repl-loop ()
+                  (loop :for c-input := (ic:readline (prompt-string))
+                        :until (cffi:null-pointer-p c-input)
+                        :for input := (cffi:foreign-string-to-lisp c-input)
+                        :do (read-print-eval-processing-errors input)
+                            (cffi:foreign-free c-input))))
+           (if (zerop *debug-level*)
+               (with-top-level-repl-restart
+                 (ic:set-history *history-file* -1)
+                 (ic:term-init)
+                 (repl-loop))
+               (repl-loop)))
 
       (ic:term-done))))
 
