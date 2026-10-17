@@ -239,18 +239,14 @@ inspect the stack or invoke a restart.")
 
     (unwind-protect
 
-         (flet ((repl-loop ()
-                  (loop :for c-input := (ic:readline (prompt-string))
-                        :until (cffi:null-pointer-p c-input)
-                        :for input := (cffi:foreign-string-to-lisp c-input)
-                        :do (read-print-eval-processing-errors input)
-                            (cffi:foreign-free c-input))))
-           (if (zerop *debug-level*)
-               (with-top-level-repl-restart
-                 (ic:set-history *history-file* -1)
-                 (ic:term-init)
-                 (repl-loop))
-               (repl-loop)))
+         (loop :for c-input := (ic:readline (prompt-string))
+               :until (cffi:null-pointer-p c-input)
+               :for input := (cffi:foreign-string-to-lisp c-input)
+               :do (if (zerop *debug-level*)
+                       (with-top-level-repl-restart
+                         (read-print-eval-processing-errors input))
+                       (read-print-eval-processing-errors input))
+                   (cffi:foreign-free c-input))
 
       (ic:term-done))))
 
