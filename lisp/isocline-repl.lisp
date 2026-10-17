@@ -239,7 +239,10 @@ inspect the stack or invoke a restart.")
 
     (unwind-protect
 
-         (loop :for c-input := (ic:readline (prompt-string))
+         (loop :initially (when (zerop *debug-level*)
+                            (ic:set-history *history-file* -1)
+                            (ic:term-init))
+               :for c-input := (ic:readline (prompt-string))
                :until (cffi:null-pointer-p c-input)
                :for input := (cffi:foreign-string-to-lisp c-input)
                :do (if (zerop *debug-level*)
